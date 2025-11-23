@@ -121,26 +121,38 @@ export default function PostForm() {
 
             <div className="space-y-2">
                 <label className="text-sm font-medium">Photos</label>
-                <CldUploadWidget
-                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                    onSuccess={(result: any) => {
-                        setValue("images", [...images, result.info.secure_url]);
-                    }}
-                >
-                    {({ open }) => {
-                        return (
-                            <Button type="button" variant="outline" onClick={() => open()}>
-                                Upload Image
-                            </Button>
-                        );
-                    }}
-                </CldUploadWidget>
+                {process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ? (
+                    <>
+                        <CldUploadWidget
+                            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                            onSuccess={(result: any) => {
+                                setValue("images", [...images, result.info.secure_url]);
+                            }}
+                        >
+                            {({ open }) => {
+                                return (
+                                    <Button type="button" variant="outline" onClick={() => open()}>
+                                        Upload Image
+                                    </Button>
+                                );
+                            }}
+                        </CldUploadWidget>
 
-                <div className="flex gap-2 mt-2 overflow-x-auto">
-                    {images.map((img, i) => (
-                        <img key={i} src={img} alt="Preview" className="h-20 w-20 object-cover rounded-md" />
-                    ))}
-                </div>
+                        <div className="flex gap-2 mt-2 overflow-x-auto">
+                            {images.map((img, i) => (
+                                <img key={i} src={img} alt="Preview" className="h-20 w-20 object-cover rounded-md" />
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className="p-4 rounded-md bg-yellow-500/10 border border-yellow-500/20">
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                            ⚠️ Image upload is disabled. Please configure Cloudinary in your .env.local file.
+                            <br />
+                            See <code className="text-xs bg-black/20 px-1 py-0.5 rounded">setup_instructions.md</code> for details.
+                        </p>
+                    </div>
+                )}
             </div>
 
             <Button type="submit" className="w-full" disabled={uploading}>
