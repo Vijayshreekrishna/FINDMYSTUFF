@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { CldUploadWidget } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import MapPicker from "./map/MapPicker";
 
 type FormData = {
     title: string;
@@ -106,11 +107,15 @@ export default function PostForm() {
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium">Location (Address)</label>
+                <label className="text-sm font-medium">Location</label>
+                <MapPicker onLocationSelect={(lat, lng) => {
+                    setValue("location.lat", lat);
+                    setValue("location.lng", lng);
+                }} />
                 <input
                     onChange={(e) => setValue("location.address", e.target.value)}
-                    className="w-full p-2 rounded-md border border-[var(--secondary)] bg-transparent"
-                    placeholder="e.g. Central Park, NY"
+                    className="w-full p-2 rounded-md border border-[var(--secondary)] bg-transparent mt-2"
+                    placeholder="Add address details (e.g. Central Park, near the fountain)"
                 />
             </div>
 
