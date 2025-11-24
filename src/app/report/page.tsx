@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
+// Force dynamic rendering since we need session access
+export const dynamic = 'force-dynamic';
+
 export default async function ReportPage() {
     const session = await getServerSession(authOptions);
 
