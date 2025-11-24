@@ -35,12 +35,34 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const type = searchParams.get("type");
         const category = searchParams.get("category");
+        const search = searchParams.get("search");
+        const limit = parseInt(searchParams.get("limit") || "50");
 
         const query: any = {};
-        if (type) query.type = type;
-        if (category) query.category = category;
 
-        const posts = await Post.find(query).sort({ createdAt: -1 }).populate("user", "name image");
+        // Filter by type (lost/found)
+        if (type && type !== "all") {
+            query.type = type;
+        }
+
+        // Filter by category
+        if (category) {
+            query.category = category;
+        }
+
+        // Search in title and description
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        const posts = await Post.find(query)
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .populate("user", "name image");
+
         return NextResponse.json(posts);
     } catch (error) {
         console.error("Error fetching posts:", error);

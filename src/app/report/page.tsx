@@ -11,16 +11,20 @@ export default async function ReportPage() {
     }
 
     return (
-        <div className="min-h-screen p-4 md:p-8 bg-[var(--background)]">
-            <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-                <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold">Report an Item</h1>
-                    <p className="text-[var(--secondary-foreground)]">
-                        Lost something? Found something? Let the community know.
-                    </p>
-                </div>
+        <div className="min-h-screen section-padding">
+            <div className="container max-w-4xl">
+                <div className="space-y-8 md:space-y-12 animate-fade-in">
+                    <div className="text-center space-y-3">
+                        <h1 className="text-responsive-3xl md:text-responsive-4xl lg:text-5xl font-bold">
+                            <span className="text-gradient">Report an Item</span>
+                        </h1>
+                        <p className="text-[var(--text-secondary)] text-responsive-base md:text-responsive-lg max-w-2xl mx-auto px-4">
+                            Lost something? Found something? Let the community know.
+                        </p>
+                    </div>
 
-                <PostForm />
+                    <PostForm />
+                </div>
             </div>
         </div>
     );

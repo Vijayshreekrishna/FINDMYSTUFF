@@ -1,21 +1,25 @@
 {
   "name": "FindMyStuff - Lost & Found",
   "short_name": "FindMyStuff",
-  "description": "A platform to connect lost and found items.",
+  "description": "The premium platform to connect lost items with their owners. Secure, fast, and community-driven.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#0D0D0D",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

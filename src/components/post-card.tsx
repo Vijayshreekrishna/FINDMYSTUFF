@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface PostProps {
@@ -7,41 +6,59 @@ interface PostProps {
 
 export default function PostCard({ post }: PostProps) {
     return (
-        <div className="glass rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full">
-            <div className="relative h-48 bg-gray-200">
-                {post.images && post.images.length > 0 ? (
-                    <img src={post.images[0]} alt={post.title} className="w-full h-full object-cover" />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">📦</div>
-                )}
-                <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold uppercase ${post.type === 'lost' ? 'bg-red-500 text-white' : 'bg-indigo-500 text-white'
-                    }`}>
-                    {post.type}
-                </div>
-            </div>
+        <Link href={`/feed/${post._id}`}>
+            <div className="bg-[var(--surface-elevated)] rounded-xl overflow-hidden hover:ring-2 hover:ring-[var(--accent)] transition-all duration-300 h-full flex flex-col group">
+                {/* Image Container - Compact 4:3 ratio */}
+                <div className="relative w-full h-48 bg-[var(--surface)] overflow-hidden">
+                    {post.images && post.images.length > 0 ? (
+                        <img
+                            src={post.images[0]}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">
+                            📦
+                        </div>
+                    )}
 
-            <div className="p-4 flex-1 flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-bold line-clamp-1">{post.title}</h3>
-                    <span className="text-xs text-[var(--secondary-foreground)] bg-[var(--secondary)] px-2 py-1 rounded-md">
+                    {/* Minimal Type Badge */}
+                    <div className={`absolute top-2 right-2 px-2 py-1 rounded-md text-xs font-semibold ${post.type === 'lost'
+                            ? 'bg-[var(--danger)] text-white'
+                            : 'bg-[var(--success)] text-white'
+                        }`}>
+                        {post.type}
+                    </div>
+                </div>
+
+                {/* Card Content - Compact */}
+                <div className="p-3 flex-1 flex flex-col">
+                    {/* Category - Small tag */}
+                    <span className="text-xs text-[var(--accent)] font-medium mb-1.5">
                         {post.category}
                     </span>
+
+                    {/* Title */}
+                    <h3 className="text-sm font-semibold line-clamp-2 text-white group-hover:text-[var(--accent)] transition-colors mb-2 min-h-[2.5rem]">
+                        {post.title}
+                    </h3>
+
+                    {/* Description - Very subtle */}
+                    <p className="text-xs text-[var(--text-dim)] line-clamp-2 mb-auto">
+                        {post.description}
+                    </p>
+
+                    {/* Footer - Minimal */}
+                    <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[var(--border)] text-xs text-[var(--text-dim)]">
+                        <span className="flex items-center gap-1 truncate">
+                            📍 {post.location?.address?.split(',')[0] || "Unknown"}
+                        </span>
+                        <span className="whitespace-nowrap ml-2">
+                            {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                    </div>
                 </div>
-
-                <p className="text-sm text-[var(--secondary-foreground)] line-clamp-2 mb-4 flex-1">
-                    {post.description}
-                </p>
-
-                <div className="flex items-center text-xs text-[var(--secondary-foreground)] mb-4 gap-2">
-                    <span>📍 {post.location?.address || "Unknown Location"}</span>
-                    <span>•</span>
-                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                </div>
-
-                <Link href={`/feed/${post._id}`} className="mt-auto">
-                    <Button variant="outline" className="w-full">View Details</Button>
-                </Link>
             </div>
-        </div>
+        </Link>
     );
 }

@@ -2,26 +2,33 @@
 
 import { useEffect, useState } from "react";
 import PostCard from "@/components/post-card";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import SearchInput from "@/components/SearchInput";
+import FilterBar from "@/components/FilterBar";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function FeedContent() {
     const [posts, setPosts] = useState([]);
-    const [filter, setFilter] = useState("all");
+    const [search, setSearch] = useState("");
+    const [category, setCategory] = useState("");
+    const [type, setType] = useState("all");
     const [loading, setLoading] = useState(true);
+
+    const debouncedSearch = useDebounce(search, 300);
 
     useEffect(() => {
         fetchPosts();
-    }, [filter]);
+    }, [debouncedSearch, category, type]);
 
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            let url = "/api/posts";
-            if (filter !== "all") {
-                url += `?type=${filter}`;
-            }
-            const res = await fetch(url);
+            const params = new URLSearchParams();
+            if (type !== "all") params.append("type", type);
+            if (category) params.append("category", category);
+            if (debouncedSearch) params.append("search", debouncedSearch);
+
+            const res = await fetch(`/api/posts?${params.toString()}`);
             const data = await res.json();
             setPosts(data);
         } catch (error) {
@@ -31,60 +38,96 @@ export default function FeedContent() {
         }
     };
 
+    const handleClearFilters = () => {
+        setSearch("");
+        setCategory("");
+        setType("all");
+    };
+
     return (
-        <div className="min-h-screen p-4 md:p-8 bg-[var(--background)]">
-            <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <h1 className="text-3xl font-bold">Public Feed</h1>
-                    <div className="flex flex-col sm:flex-row gap-2 items-center">
-                        <Link href="/report">
-                            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg">
-                                📝 Report Item
-                            </Button>
-                        </Link>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={filter === "all" ? "default" : "outline"}
-                                onClick={() => setFilter("all")}
-                            >
-                                All
-                            </Button>
-                            <Button
-                                variant={filter === "lost" ? "default" : "outline"}
-                                onClick={() => setFilter("lost")}
-                                className={filter === "lost" ? "bg-red-500 hover:bg-red-600" : ""}
-                            >
-                                Lost
-                            </Button>
-                            <Button
-                                variant={filter === "found" ? "default" : "outline"}
-                                onClick={() => setFilter("found")}
-                                className={filter === "found" ? "bg-indigo-500 hover:bg-indigo-600" : ""}
-                            >
-                                Found
-                            </Button>
+        <div className="min-h-screen">
+            {/* Sticky Header Section - Minimal with breathing room */}
+            <div className="sticky top-0 z-40 backdrop-blur-xl bg-[var(--background)]/80 border-b border-[var(--border)]">
+                <div className="container max-w-6xl py-6 md:py-8">
+                    <div className="space-y-6">
+                        {/* Minimal Top Bar */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                                    Discover Items
+                                </h1>
+                                {!loading && (
+                                    <p className="text-sm text-[var(--text-dim)] mt-1">
+                                        {posts.length} items available
+                                    </p>
+                                )}
+                            </div>
+                            <Link href="/report">
+                                <button className="premium-button premium-button-primary text-sm">
+                                    + New Report
+                                </button>
+                            </Link>
                         </div>
+
+                        {/* Minimal Search */}
+                        <SearchInput
+                            value={search}
+                            onChange={setSearch}
+                            placeholder="Search items..."
+                        />
+
+                        {/* Minimal Filters */}
+                        <FilterBar
+                            category={category}
+                            type={type}
+                            onCategoryChange={setCategory}
+                            onTypeChange={setType}
+                            onClearFilters={handleClearFilters}
+                        />
                     </div>
                 </div>
+            </div>
 
+            {/* Main Content - Centered with breathing room */}
+            <div className="container max-w-6xl py-8 md:py-12">
+                {/* Loading State */}
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="h-80 rounded-xl bg-[var(--secondary)] animate-pulse"></div>
+                    <div className="grid-responsive">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="skeleton h-96 rounded-xl" />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {posts.map((post: any) => (
-                            <PostCard key={post._id} post={post} />
-                        ))}
-                    </div>
-                )}
-
-                {!loading && posts.length === 0 && (
-                    <div className="text-center py-20 text-[var(--secondary-foreground)]">
-                        <p className="text-xl">No items found.</p>
-                    </div>
+                    <>
+                        {/* Posts Grid */}
+                        {posts.length > 0 ? (
+                            <div className="grid-responsive animate-fade-in">
+                                {posts.map((post: any) => (
+                                    <PostCard key={post._id} post={post} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20 animate-fade-in">
+                                <div className="max-w-md mx-auto space-y-4">
+                                    <div className="text-5xl opacity-50">🔍</div>
+                                    <h3 className="text-xl font-semibold text-white">
+                                        No items found
+                                    </h3>
+                                    <p className="text-sm text-[var(--text-secondary)]">
+                                        Try adjusting your filters
+                                    </p>
+                                    {(search || category || type !== "all") && (
+                                        <button
+                                            onClick={handleClearFilters}
+                                            className="premium-button premium-button-ghost text-sm mt-4"
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
