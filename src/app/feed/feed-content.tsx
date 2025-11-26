@@ -47,7 +47,7 @@ export default function FeedContent() {
     return (
         <div className="min-h-screen">
             {/* Sticky Header Section - Minimal with breathing room */}
-            <div className="sticky top-0 z-40 backdrop-blur-xl bg-[var(--background)]/80 border-b border-[var(--border)]">
+            <div className="sticky top-16 z-40 backdrop-blur-xl bg-[var(--background)]/80 border-b border-[var(--border)]">
                 <div className="container max-w-6xl py-6 md:py-8">
                     <div className="space-y-6">
                         {/* Minimal Top Bar */}
@@ -103,7 +103,7 @@ export default function FeedContent() {
                         {posts.length > 0 ? (
                             <div className="grid-responsive animate-fade-in">
                                 {posts.map((post: any) => (
-                                    <PostCard key={post._id} post={post} />
+                                    <PostCard key={post._id} post={post} onDelete={fetchPosts} />
                                 ))}
                             </div>
                         ) : (

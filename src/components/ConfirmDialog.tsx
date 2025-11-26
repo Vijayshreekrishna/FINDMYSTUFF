@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    onConfirm: (e?: React.MouseEvent) => void | Promise<void>;
     title: string;
     message: string;
     confirmText?: string;
@@ -23,6 +24,12 @@ export default function ConfirmDialog({
     cancelText = "Cancel",
     isDanger = false
 }: ConfirmDialogProps) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
@@ -34,10 +41,10 @@ export default function ConfirmDialog({
         };
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    if (!mounted || !isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fade-in">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/80 backdrop-blur-sm"
@@ -45,7 +52,13 @@ export default function ConfirmDialog({
             />
 
             {/* Dialog */}
-            <div className="relative glass-elevated rounded-2xl p-8 max-w-md w-full shadow-premium animate-scale-in">
+            <div
+                className="relative glass-elevated rounded-2xl p-8 max-w-md w-full shadow-premium animate-scale-in"
+                onClick={(e) => {
+                    // Prevent clicks inside dialog from reaching backdrop
+                    e.stopPropagation();
+                }}
+            >
                 <h2 className="text-2xl font-bold mb-3 text-white">
                     {title}
                 </h2>
@@ -61,9 +74,13 @@ export default function ConfirmDialog({
                         {cancelText}
                     </button>
                     <button
-                        onClick={() => {
+                        onClick={(e) => {
+                            console.log('🟢 Confirm button clicked in dialog!');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Calling onConfirm...');
                             onConfirm();
-                            onClose();
+                            console.log('onConfirm called');
                         }}
                         className={`premium-button px-6 ${isDanger ? 'premium-button-danger' : 'premium-button-primary'
                             }`}
@@ -72,6 +89,7 @@ export default function ConfirmDialog({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

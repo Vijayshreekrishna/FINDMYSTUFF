@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
         const posts = await Post.find(query)
             .sort({ createdAt: -1 })
             .limit(limit)
-            .populate("user", "name image");
+            .populate("user", "name image email");
 
         return NextResponse.json(posts);
     } catch (error) {

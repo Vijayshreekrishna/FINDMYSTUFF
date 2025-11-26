@@ -4,6 +4,26 @@ import Post from "@/models/Post";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        await dbConnect();
+        const { id } = await params;
+        const post = await Post.findById(id).populate("user", "name image");
+
+        if (!post) {
+            return NextResponse.json({ error: "Post not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(post);
+    } catch (error) {
+        console.error("Error fetching post:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -25,11 +45,20 @@ export async function DELETE(
 
         // Check ownership
         // @ts-ignore
-        if (post.user.toString() !== session.user.id) {
+        const postUserId = post.user.toString();
+        // @ts-ignore
+        const sessionUserId = session.user.id;
+
+        console.log('Delete attempt - Post User ID:', postUserId);
+        console.log('Delete attempt - Session User ID:', sessionUserId);
+
+        if (postUserId !== sessionUserId) {
+            console.log('Ownership check failed');
             return NextResponse.json({ error: "Forbidden - You can only delete your own posts" }, { status: 403 });
         }
 
         await Post.findByIdAndDelete(id);
+        console.log('Post deleted successfully:', id);
 
         return NextResponse.json({ success: true, message: "Post deleted successfully" });
     } catch (error) {
