@@ -143,12 +143,17 @@ export default function PostForm() {
             {/* Location */}
             <div className="space-y-3">
                 <label className="text-sm font-medium text-[var(--text-secondary)]">Location</label>
-                <MapPicker onLocationSelect={(lat, lng) => {
-                    setValue("location.lat", lat);
-                    setValue("location.lng", lng);
-                }} />
+                <MapPicker
+                    onLocationSelect={(lat, lng) => {
+                        setValue("location.lat", lat);
+                        setValue("location.lng", lng);
+                    }}
+                    onAddressChange={(address) => {
+                        setValue("location.address", address);
+                    }}
+                />
                 <input
-                    onChange={(e) => setValue("location.address", e.target.value)}
+                    {...register("location.address")}
                     className="premium-input w-full"
                     placeholder="Add address details (e.g. Central Park, near the fountain)"
                 />

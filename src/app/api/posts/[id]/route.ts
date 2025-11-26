@@ -49,18 +49,13 @@ export async function DELETE(
         // @ts-ignore
         const sessionUserId = session.user.id;
 
-        console.log('Delete attempt - Post User ID:', postUserId);
-        console.log('Delete attempt - Session User ID:', sessionUserId);
-
         if (postUserId !== sessionUserId) {
-            console.log('Ownership check failed');
             return NextResponse.json({ error: "Forbidden - You can only delete your own posts" }, { status: 403 });
         }
 
         await Post.findByIdAndDelete(id);
-        console.log('Post deleted successfully:', id);
 
-        return NextResponse.json({ success: true, message: "Post deleted successfully" });
+        return NextResponse.json({ message: "Post deleted successfully" });
     } catch (error) {
         console.error("Error deleting post:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

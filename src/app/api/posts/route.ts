@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
         await dbConnect();
         const data = await req.json();
 
+        console.log("Received post data:", data);
+        console.log("Location data:", data.location);
+
         // @ts-ignore
         const userId = session.user.id; // Added in session callback
 
@@ -21,6 +24,8 @@ export async function POST(req: NextRequest) {
             ...data,
             user: userId,
         });
+
+        console.log("Created post:", post);
 
         return NextResponse.json(post, { status: 201 });
     } catch (error) {
