@@ -1,91 +1,102 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Search, CheckCircle, MapPin, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
-export default function Home() {
+export default function HomePage() {
+    const features = [
+        {
+            icon: Search,
+            title: "Report Lost Items",
+            description: "Quickly report lost items with photos and location details."
+        },
+        {
+            icon: CheckCircle,
+            title: "Find What's Lost",
+            description: "Browse found items and reunite with your belongings."
+        },
+        {
+            icon: MapPin,
+            title: "Location-Based",
+            description: "Smart filters to find items near you in the community."
+        }
+    ];
+
     return (
-        <div className="min-h-screen flex flex-col">
-            {/* Background with glow */}
-            <div className="fixed inset-0 bg-gradient-to-br from-[var(--background)] via-[var(--surface)] to-[var(--background)] -z-10" />
-            <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-[var(--accent)] opacity-10 blur-3xl rounded-full animate-pulse -z-10" />
+        <div className="min-h-screen bg-[var(--background)]">
+            {/* Hero Section */}
+            <section className="container py-[var(--space-8)]">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-3xl mx-auto text-center space-y-6"
+                >
+                    <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                        Lost Something?
+                        <br />
+                        <span className="text-gradient">We'll Help You Find It</span>
+                    </h1>
+                    <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
+                        The premium platform to connect lost items with their owners. Secure, fast, and community-driven.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+                        <Link href="/feed">
+                            <Button size="lg" className="w-full sm:w-auto">
+                                Get Started
+                                <ArrowRight size={18} className="ml-2" />
+                            </Button>
+                        </Link>
+                        <Link href="/report">
+                            <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+                                Report an Item
+                            </Button>
+                        </Link>
+                    </div>
+                </motion.div>
+            </section>
 
-            {/* Main Content */}
-            <main className="flex-1 flex items-center justify-center section-padding">
-                <div className="container max-w-6xl">
-                    <div className="space-y-12 md:space-y-16 animate-fade-in text-center">
-                        {/* Hero Section */}
-                        <div className="space-y-6">
-                            <h1 className="text-responsive-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter">
-                                <span className="text-gradient">FindMyStuff</span>
-                            </h1>
-                            <p className="text-responsive-lg md:text-responsive-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed px-4">
-                                The premium platform to connect lost items with their owners.
-                                <br className="hidden md:block" />
-                                <span className="text-[var(--text-dim)]">Secure, fast, and community-driven.</span>
-                            </p>
-                        </div>
+            {/* Features */}
+            <section className="container py-[var(--space-6)]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {features.map((feature, index) => (
+                        <motion.div
+                            key={feature.title}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                        >
+                            <Card className="h-full space-y-3 hover:border-[var(--accent)] transition-colors">
+                                <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center">
+                                    <feature.icon size={24} className="text-[var(--accent)]" />
+                                </div>
+                                <h3 className="text-lg font-bold text-white">{feature.title}</h3>
+                                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{feature.description}</p>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </div>
+            </section>
 
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-                            <Link href="/api/auth/signin?callbackUrl=/feed" className="w-full sm:w-auto">
-                                <button className="premium-button premium-button-primary shadow-glow w-full sm:w-auto px-8 py-4 text-lg">
-                                    Get Started
-                                </button>
-                            </Link>
-                            <Link href="/feed" className="w-full sm:w-auto">
-                                <button className="premium-button premium-button-ghost w-full sm:w-auto px-8 py-4 text-lg">
-                                    Browse Items
-                                </button>
-                            </Link>
-                        </div>
-
-                        {/* Features Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 px-4">
-                            <FeatureCard
-                                title="Report Lost Items"
-                                desc="Quickly report lost items with location and photos."
-                                icon="📍"
-                            />
-                            <FeatureCard
-                                title="Community Driven"
-                                desc="Connect with people nearby to recover your belongings."
-                                icon="🤝"
-                            />
-                            <FeatureCard
-                                title="Secure & Private"
-                                desc="Your data is protected. Connect safely with others."
-                                icon="🔒"
-                            />
-                        </div>
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-3 gap-4 md:gap-8 pt-12 border-t border-[var(--border)] max-w-2xl mx-auto px-4">
-                            <div className="text-center">
-                                <div className="text-responsive-2xl md:text-responsive-3xl font-bold text-gradient mb-1">Fast</div>
-                                <div className="text-xs md:text-sm text-[var(--text-dim)]">Response Time</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-responsive-2xl md:text-responsive-3xl font-bold text-gradient mb-1">Secure</div>
-                                <div className="text-xs md:text-sm text-[var(--text-dim)]">Data Protection</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-responsive-2xl md:text-responsive-3xl font-bold text-gradient mb-1">Simple</div>
-                                <div className="text-xs md:text-sm text-[var(--text-dim)]">User Experience</div>
-                            </div>
-                        </div>
+            {/* Stats */}
+            <section className="container py-[var(--space-6)]">
+                <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto text-center">
+                    <div>
+                        <p className="text-2xl md:text-3xl font-bold text-white">1000+</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">Items Found</p>
+                    </div>
+                    <div>
+                        <p className="text-2xl md:text-3xl font-bold text-white">500+</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">Active Users</p>
+                    </div>
+                    <div>
+                        <p className="text-2xl md:text-3xl font-bold text-white">50+</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">Cities</p>
                     </div>
                 </div>
-            </main>
-        </div>
-    );
-}
-
-function FeatureCard({ title, desc, icon }: { title: string, desc: string, icon: string }) {
-    return (
-        <div className="premium-card text-left group">
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                {icon}
-            </div>
-            <h3 className="text-responsive-lg md:text-responsive-xl font-semibold mb-2 text-white">{title}</h3>
-            <p className="text-responsive-sm text-[var(--text-secondary)] leading-relaxed">{desc}</p>
+            </section>
         </div>
     );
 }

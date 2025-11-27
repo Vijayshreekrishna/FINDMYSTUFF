@@ -18,112 +18,65 @@ export default function PostCard({ post, onDelete }: PostProps) {
 
     const sessionUserId = (session?.user as any)?.id;
     const postUserId = post.user?._id?.toString() || post.user?.toString();
-    const sessionEmail = session?.user?.email;
-    const postEmail = post.user?.email;
-
-    const isOwner = (sessionUserId && postUserId && sessionUserId === postUserId) || (sessionEmail && postEmail && sessionEmail === postEmail);
+    const isOwner = sessionUserId && postUserId && sessionUserId === postUserId;
 
     const handleDelete = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-
-        if (!confirm("Are you sure you want to delete this post?")) return;
+        if (!confirm("Delete this post?")) return;
 
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/posts/${post._id}`, {
-                method: "DELETE",
-            });
-
-            if (res.ok) {
-                if (onDelete) onDelete();
-            } else {
-                alert("Failed to delete post");
-            }
+            const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
+            if (res.ok && onDelete) onDelete();
         } catch (error) {
-            console.error("Error deleting post:", error);
-            alert("Error deleting post");
+            console.error(error);
         } finally {
             setIsDeleting(false);
         }
     };
 
     return (
-        <Card className="h-full flex flex-col group relative overflow-hidden border-0 bg-[var(--surface-elevated)] p-0 hover:shadow-premium transition-all duration-500">
-            {/* Delete Button (Owner Only) */}
+        <Card className="group relative overflow-hidden p-0 hover:border-[var(--accent)] transition-all">
             {isOwner && (
-                <Button
-                    variant="danger"
-                    size="icon"
+                <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="absolute top-2 left-2 w-8 h-8 rounded-full bg-black/50 hover:bg-[var(--danger)] backdrop-blur-md z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    title="Delete Post"
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 hover:bg-[var(--danger)] backdrop-blur-md z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
                 >
-                    {isDeleting ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        <Trash2 className="w-4 h-4" />
-                    )}
-                </Button>
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                </button>
             )}
 
-            {/* Card Content */}
-            <Link href={`/feed/${post._id}`} className="flex flex-col h-full">
-                {/* Image Container */}
-                <div className="relative w-full h-52 bg-[var(--surface)] overflow-hidden">
-                    {post.images && post.images.length > 0 ? (
-                        <img
-                            src={post.images[0]}
-                            alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                        />
+            <Link href={`/feed/${post._id}`} className="block">
+                {/* Image - 16:9 */}
+                <div className="relative w-full aspect-video bg-[var(--surface)] overflow-hidden">
+                    {post.images?.[0] ? (
+                        <img src={post.images[0]} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-20 grayscale">
-                            📦
-                        </div>
+                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">📦</div>
                     )}
-
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface-elevated)] via-transparent to-transparent opacity-60" />
-
-                    {/* Type Badge */}
-                    <div
-                        className={`absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase backdrop-blur-md border border-white/10 shadow-lg ${post.type === "lost"
-                            ? "bg-red-500/20 text-red-200 border-red-500/20"
-                            : "bg-emerald-500/20 text-emerald-200 border-emerald-500/20"
-                            }`}
-                    >
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded-lg text-xs font-bold uppercase backdrop-blur-md ${post.type === "lost" ? "bg-red-500/20 text-red-200 border border-red-500/30" : "bg-emerald-500/20 text-emerald-200 border border-emerald-500/30"
+                        }`}>
                         {post.type}
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-5 flex-1 flex flex-col relative">
-                    {/* Category */}
-                    <span className="text-[10px] font-bold tracking-widest text-[var(--accent)] uppercase mb-2">
+                <div className="p-4 space-y-2">
+                    <span className="inline-block px-2 py-1 rounded-md text-xs font-bold text-white bg-[var(--accent)] opacity-90">
                         {post.category}
                     </span>
-
-                    {/* Title */}
-                    <h3 className="text-lg font-bold leading-tight text-white group-hover:text-[var(--accent)] transition-colors duration-300 mb-3 line-clamp-2">
+                    <h3 className="text-base font-bold text-white line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
                         {post.title}
                     </h3>
-
-                    {/* Description */}
-                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2 mb-auto leading-relaxed">
-                        {post.description}
-                    </p>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--border)]">
-                        <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-dim)] font-medium">
+                    <p className="text-sm text-[var(--text-secondary)] line-clamp-2">{post.description}</p>
+                    <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+                        <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
                             <MapPin className="w-3 h-3 text-[var(--accent)]" />
-                            <span className="truncate max-w-[120px]">
-                                {post.location?.address?.split(',')[0] || "Unknown"}
-                            </span>
+                            <span className="truncate max-w-[100px]">{post.location?.address?.split(',')[0] || "Unknown"}</span>
                         </div>
-                        <span className="text-[10px] text-[var(--text-dim)] font-medium bg-[var(--surface)] px-2 py-1 rounded-md">
+                        <span className="text-xs text-[var(--text-secondary)]">
                             {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                     </div>

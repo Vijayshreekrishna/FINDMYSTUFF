@@ -1,31 +1,26 @@
 "use client";
 
-import * as React from "react";
 import { cn } from "@/lib/utils";
 import { motion, HTMLMotionProps } from "framer-motion";
+import React from "react";
 
 interface CardProps extends HTMLMotionProps<"div"> {
-    variant?: "default" | "glass" | "elevated";
+    variant?: "default" | "elevated";
 }
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ({ className, variant = "default", children, ...props }, ref) => {
+        const baseStyles = "rounded-[var(--radius-lg)] border border-[var(--border)] p-[var(--space-2)] transition-all";
+
         const variants = {
-            default: "bg-[var(--surface)] border-[var(--border)]",
-            glass: "bg-black/40 backdrop-blur-xl border-white/10",
-            elevated: "bg-[var(--surface-elevated)] border-[var(--border-hover)] shadow-xl",
+            default: "bg-[var(--surface)]",
+            elevated: "bg-[var(--surface)] shadow-xl"
         };
 
         return (
             <motion.div
                 ref={ref}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={cn(
-                    "rounded-2xl border p-6 transition-all duration-300 hover:shadow-glow hover:border-[var(--accent-dim)]",
-                    variants[variant],
-                    className
-                )}
+                className={cn(baseStyles, variants[variant], className)}
                 {...props}
             >
                 {children}
@@ -33,6 +28,5 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         );
     }
 );
-Card.displayName = "Card";
 
-export { Card };
+Card.displayName = "Card";

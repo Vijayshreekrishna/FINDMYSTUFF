@@ -1,58 +1,46 @@
 "use client";
 
-import * as React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { motion, HTMLMotionProps } from "framer-motion";
+import { Loader2 } from "lucide-react";
+import React from "react";
 
 interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
-    variant?: "primary" | "ghost" | "danger" | "outline";
-    size?: "sm" | "md" | "lg" | "icon";
+    variant?: "primary" | "secondary" | "ghost" | "danger";
+    size?: "sm" | "md" | "lg";
     isLoading?: boolean;
-    children?: React.ReactNode;
+    children: React.ReactNode;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = "primary", size = "md", isLoading, children, ...props }, ref) => {
+        const baseStyles = "inline-flex items-center justify-center font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-[var(--radius-md)]";
+
         const variants = {
-            primary: "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-glow",
-            ghost: "bg-transparent text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--accent-dim)]",
-            danger: "bg-[var(--danger)] text-white hover:bg-red-600 shadow-lg shadow-red-500/20",
-            outline: "border border-[var(--border)] bg-transparent text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
+            primary: "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-[0_4px_16px_rgba(164,92,255,0.2)]",
+            secondary: "bg-[var(--surface)] text-white border border-[var(--border)] hover:border-[var(--accent)]",
+            ghost: "bg-transparent text-[var(--text-secondary)] hover:text-white hover:bg-[var(--surface)]",
+            danger: "bg-[var(--danger)] text-white hover:bg-red-600"
         };
 
         const sizes = {
-            sm: "h-9 px-3 text-xs",
-            md: "h-11 px-6 text-sm",
-            lg: "h-14 px-8 text-base",
-            icon: "h-10 w-10 p-2",
+            sm: "h-10 px-4 text-sm",
+            md: "h-[var(--button-height)] px-6 text-sm",
+            lg: "h-14 px-8 text-base"
         };
 
         return (
             <motion.button
                 ref={ref}
-                whileTap={{ scale: 0.96 }}
-                whileHover={{ scale: 1.02 }}
-                className={cn(
-                    "relative inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:pointer-events-none disabled:opacity-50",
-                    variants[variant],
-                    sizes[size],
-                    className
-                )}
+                whileTap={{ scale: 0.98 }}
+                className={cn(baseStyles, variants[variant], sizes[size], className)}
                 disabled={isLoading || props.disabled}
                 {...props}
             >
-                {isLoading ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    </div>
-                ) : null}
-                <span className={cn("flex items-center gap-2", isLoading && "invisible")}>
-                    {children}
-                </span>
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : children}
             </motion.button>
         );
     }
 );
-Button.displayName = "Button";
 
-export { Button };
+Button.displayName = "Button";

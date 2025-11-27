@@ -2,43 +2,43 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { LucideIcon } from "lucide-react";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
+    icon?: LucideIcon;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, error, ...props }, ref) => {
+    ({ className, type, label, error, icon: Icon, ...props }, ref) => {
         return (
-            <div className="relative space-y-1">
+            <div className="space-y-1 w-full">
                 {label && (
-                    <label className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider ml-1">
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                         {label}
                     </label>
                 )}
-                <div className="relative group">
+                <div className="relative">
+                    {Icon && (
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
+                            <Icon size={18} />
+                        </div>
+                    )}
                     <input
                         type={type}
                         className={cn(
-                            "flex h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[var(--text-dim)] focus-visible:outline-none focus-visible:border-[var(--accent)] focus-visible:shadow-[0_0_0_4px_var(--accent-dim)] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
-                            error && "border-[var(--danger)] focus-visible:border-[var(--danger)] focus-visible:shadow-[0_0_0_4px_var(--danger-dim)]",
+                            "flex h-[var(--input-height)] w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-input)] px-4 text-sm text-white placeholder:text-[var(--text-secondary)]/50 focus-visible:outline-none focus-visible:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/20 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+                            Icon && "pl-11",
+                            error && "border-[var(--danger)]",
                             className
                         )}
                         ref={ref}
                         {...props}
                     />
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[var(--accent)] to-purple-600 opacity-0 group-hover:opacity-10 -z-10 blur-xl transition-opacity duration-500" />
                 </div>
                 {error && (
-                    <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xs text-[var(--danger)] ml-1"
-                    >
-                        {error}
-                    </motion.p>
+                    <p className="text-xs text-[var(--danger)] font-medium">{error}</p>
                 )}
             </div>
         );
