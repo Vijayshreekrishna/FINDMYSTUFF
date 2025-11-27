@@ -3,8 +3,9 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-interface PageContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PageContainerProps {
     children: React.ReactNode;
+    className?: string;
     fullWidth?: boolean;
 }
 
@@ -12,7 +13,6 @@ export function PageContainer({
     children,
     className,
     fullWidth = false,
-    ...props
 }: PageContainerProps) {
     return (
         <motion.main
@@ -25,7 +25,6 @@ export function PageContainer({
                 !fullWidth && "container mx-auto px-4 md:px-6 max-w-2xl",
                 className
             )}
-            {...props}
         >
             {children}
         </motion.main>
