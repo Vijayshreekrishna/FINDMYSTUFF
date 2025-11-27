@@ -1,53 +1,57 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+"use client";
 
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
-}
+import * as React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    asChild?: boolean
-    variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
-    size?: "default" | "sm" | "lg" | "icon"
+interface ButtonProps extends HTMLMotionProps<"button"> {
+    variant?: "primary" | "ghost" | "danger" | "outline";
+    size?: "sm" | "md" | "lg" | "icon";
+    isLoading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
-        const Comp = asChild ? Slot : "button"
-
+    ({ className, variant = "primary", size = "md", isLoading, children, ...props }, ref) => {
         const variants = {
-            default: "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90",
-            destructive: "bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:opacity-90",
-            outline: "border border-[var(--secondary)] bg-transparent hover:bg-[var(--secondary)] hover:text-[var(--secondary-foreground)]",
-            secondary: "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:opacity-80",
-            ghost: "hover:bg-[var(--secondary)] hover:text-[var(--secondary-foreground)]",
-            link: "text-[var(--primary)] underline-offset-4 hover:underline",
-        }
+            primary: "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-glow",
+            ghost: "bg-transparent text-[var(--text-secondary)] hover:text-[var(--accent)] hover:bg-[var(--accent-dim)]",
+            danger: "bg-[var(--danger)] text-white hover:bg-red-600 shadow-lg shadow-red-500/20",
+            outline: "border border-[var(--border)] bg-transparent text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
+        };
 
         const sizes = {
-            default: "h-10 px-4 py-2",
-            sm: "h-9 rounded-md px-3",
-            lg: "h-11 rounded-md px-8",
-            icon: "h-10 w-10",
-        }
+            sm: "h-9 px-3 text-xs",
+            md: "h-11 px-6 text-sm",
+            lg: "h-14 px-8 text-base",
+            icon: "h-10 w-10 p-2",
+        };
 
         return (
-            <Comp
+            <motion.button
+                ref={ref}
+                whileTap={{ scale: 0.96 }}
+                whileHover={{ scale: 1.02 }}
                 className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                    "relative inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:pointer-events-none disabled:opacity-50",
                     variants[variant],
                     sizes[size],
                     className
                 )}
-                ref={ref}
+                disabled={isLoading || props.disabled}
                 {...props}
-            />
-        )
+            >
+                {isLoading ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    </div>
+                ) : null}
+                <span className={cn("flex items-center gap-2", isLoading && "invisible")}>
+                    {children}
+                </span>
+            </motion.button>
+        );
     }
-)
-Button.displayName = "Button"
+);
+Button.displayName = "Button";
 
-export { Button }
+export { Button };

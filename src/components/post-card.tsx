@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, MapPin } from "lucide-react";
 import { useState } from "react";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 interface PostProps {
     post: any;
@@ -47,13 +49,15 @@ export default function PostCard({ post, onDelete }: PostProps) {
     };
 
     return (
-        <div className="bg-[var(--surface-elevated)] rounded-xl overflow-hidden hover:ring-2 hover:ring-[var(--accent)] transition-all duration-300 h-full flex flex-col group relative">
+        <Card className="h-full flex flex-col group relative overflow-hidden border-0 bg-[var(--surface-elevated)] p-0 hover:shadow-premium transition-all duration-500">
             {/* Delete Button (Owner Only) */}
             {isOwner && (
-                <button
+                <Button
+                    variant="danger"
+                    size="icon"
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="absolute top-2 left-2 p-1.5 rounded-full bg-black/50 hover:bg-[var(--danger)] text-white transition-colors backdrop-blur-sm z-50"
+                    className="absolute top-2 left-2 w-8 h-8 rounded-full bg-black/50 hover:bg-[var(--danger)] backdrop-blur-md z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     title="Delete Post"
                 >
                     {isDeleting ? (
@@ -61,61 +65,70 @@ export default function PostCard({ post, onDelete }: PostProps) {
                     ) : (
                         <Trash2 className="w-4 h-4" />
                     )}
-                </button>
+                </Button>
             )}
 
-            {/* Card Content - Compact */}
+            {/* Card Content */}
             <Link href={`/feed/${post._id}`} className="flex flex-col h-full">
-                {/* Image Container - Compact 4:3 ratio */}
-                <div className="relative w-full h-48 bg-[var(--surface)] overflow-hidden">
+                {/* Image Container */}
+                <div className="relative w-full h-52 bg-[var(--surface)] overflow-hidden">
                     {post.images && post.images.length > 0 ? (
                         <img
                             src={post.images[0]}
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">
+                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-20 grayscale">
                             📦
                         </div>
                     )}
 
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface-elevated)] via-transparent to-transparent opacity-60" />
+
                     {/* Type Badge */}
                     <div
-                        className={`absolute top-2 right-2 px-2 py-1 rounded-md text-xs font-semibold ${post.type === "lost" ? "bg-[var(--danger)] text-white" : "bg-[var(--success)] text-white"}`}
+                        className={`absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase backdrop-blur-md border border-white/10 shadow-lg ${post.type === "lost"
+                            ? "bg-red-500/20 text-red-200 border-red-500/20"
+                            : "bg-emerald-500/20 text-emerald-200 border-emerald-500/20"
+                            }`}
                     >
                         {post.type}
                     </div>
                 </div>
 
-                {/* Card Content - Compact */}
-                <div className="p-3 flex-1 flex flex-col">
-                    {/* Category - Small tag */}
-                    <span className="text-xs text-[var(--accent)] font-medium mb-1.5">
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col relative">
+                    {/* Category */}
+                    <span className="text-[10px] font-bold tracking-widest text-[var(--accent)] uppercase mb-2">
                         {post.category}
                     </span>
 
                     {/* Title */}
-                    <h3 className="text-sm font-semibold line-clamp-2 text-white group-hover:text-[var(--accent)] transition-colors mb-2 min-h-2.5rem">
+                    <h3 className="text-lg font-bold leading-tight text-white group-hover:text-[var(--accent)] transition-colors duration-300 mb-3 line-clamp-2">
                         {post.title}
                     </h3>
 
-                    {/* Description - Very subtle */}
-                    <p className="text-xs text-[var(--text-dim)] line-clamp-2 mb-auto">
+                    {/* Description */}
+                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2 mb-auto leading-relaxed">
                         {post.description}
                     </p>
 
-                    {/* Footer - Minimal */}
-                    <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[var(--border)] text-xs text-[var(--text-dim)]">
-                        <span className="flex items-center gap-1 truncate">
-                            📍 {post.location?.address?.split(',')[0] || "Unknown"}
-                        </span>
-                        <span className="whitespace-nowrap ml-2">
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--border)]">
+                        <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-dim)] font-medium">
+                            <MapPin className="w-3 h-3 text-[var(--accent)]" />
+                            <span className="truncate max-w-[120px]">
+                                {post.location?.address?.split(',')[0] || "Unknown"}
+                            </span>
+                        </div>
+                        <span className="text-[10px] text-[var(--text-dim)] font-medium bg-[var(--surface)] px-2 py-1 rounded-md">
                             {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                     </div>
                 </div>
             </Link>
-        </div>
+        </Card>
     );
 }

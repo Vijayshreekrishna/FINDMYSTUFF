@@ -41,9 +41,15 @@ export async function GET(req: NextRequest) {
         const type = searchParams.get("type");
         const category = searchParams.get("category");
         const search = searchParams.get("search");
+        const userId = searchParams.get("userId");
         const limit = parseInt(searchParams.get("limit") || "50");
 
         const query: any = {};
+
+        // Filter by user
+        if (userId) {
+            query.user = userId;
+        }
 
         // Filter by type (lost/found)
         if (type && type !== "all") {
