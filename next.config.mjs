@@ -2,59 +2,24 @@ import withPWA from '@ducanh2912/next-pwa';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    turbopack: {},
     images: {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'lh3.googleusercontent.com',
+                hostname: 'res.cloudinary.com',
             },
             {
                 protocol: 'https',
-                hostname: 'res.cloudinary.com',
+                hostname: 'lh3.googleusercontent.com',
             },
         ],
     },
-    turbopack: {},
 };
 
 export default withPWA({
     dest: 'public',
+    disable: process.env.NODE_ENV === 'development',
     register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development',
-    runtimeCaching: [
-        {
-            urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-                cacheName: 'google-fonts-webfonts',
-                expiration: {
-                    maxEntries: 4,
-                    maxAgeSeconds: 365 * 24 * 60 * 60
-                }
-            }
-        },
-        {
-            urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-                cacheName: 'cloudinary-images',
-                expiration: {
-                    maxEntries: 60,
-                    maxAgeSeconds: 30 * 24 * 60 * 60
-                }
-            }
-        },
-        {
-            urlPattern: /^\/api\/posts/,
-            handler: 'NetworkFirst',
-            options: {
-                cacheName: 'api-posts',
-                expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 5 * 60
-                }
-            }
-        }
-    ]
 })(nextConfig);

@@ -4,7 +4,6 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/InstallPrompt";
 import { Header } from "@/components/layout/Header";
-import { MobileNav } from "@/components/layout/MobileNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +19,7 @@ export const metadata: Metadata = {
   title: "FindMyStuff - Lost & Found",
   description: "The premium platform to connect lost items with their owners. Secure, fast, and community-driven.",
   manifest: "/manifest.json",
-  themeColor: "#0D0D0D",
+  themeColor: "#0b0b0b",
 };
 
 export default function RootLayout({
@@ -37,7 +36,6 @@ export default function RootLayout({
         <Providers>
           <Header />
           {children}
-          <MobileNav />
           <InstallPrompt />
         </Providers>
       </body>

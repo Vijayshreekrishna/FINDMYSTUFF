@@ -1,46 +1,108 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import PostCard from "@/components/post-card";
 import { useDebounce } from "@/hooks/useDebounce";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Plus, Search as SearchIcon, ChevronDown, Layers, Search, CheckCircle } from "lucide-react";
+import { Plus, Search as SearchIcon, ChevronDown, Layers, Search, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { Input } from "@/components/ui/Input";
 
 export default function FeedContent() {
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState<any[]>([]);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("");
     const [type, setType] = useState("all");
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(0);
+    const observerTarget = useRef(null);
 
     const debouncedSearch = useDebounce(search, 300);
 
     useEffect(() => {
-        fetchPosts();
+        // Reset to first page when filters change
+        setPage(0);
+        setPosts([]);
+        setHasMore(true);
+        fetchPosts(0, true);
     }, [debouncedSearch, category, type]);
 
-    const fetchPosts = async () => {
-        setLoading(true);
+    useEffect(() => {
+        // Set up Intersection Observer for infinite scroll
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+                    loadMore();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
+
+        return () => {
+            if (observerTarget.current) {
+                observer.unobserve(observerTarget.current);
+            }
+        };
+    }, [hasMore, loading, loadingMore, page]);
+
+    const fetchPosts = async (pageNum: number, isInitial = false) => {
+        if (isInitial) {
+            setLoading(true);
+        } else {
+            setLoadingMore(true);
+        }
+
         try {
             const params = new URLSearchParams();
             if (type !== "all") params.append("type", type);
             if (category) params.append("category", category);
             if (debouncedSearch) params.append("search", debouncedSearch);
+            params.append("skip", (pageNum * 12).toString());
+            params.append("limit", "12");
 
             const res = await fetch(`/api/posts?${params.toString()}`);
             const data = await res.json();
-            setPosts(data);
+
+            console.log("API Response:", data);
+
+            // Handle the new response structure
+            const postsData = data.posts || [];
+
+            if (isInitial) {
+                setPosts(postsData);
+            } else {
+                // Filter out duplicates by checking if post._id already exists
+                setPosts(prev => {
+                    const existingIds = new Set(prev.map((p: any) => p._id));
+                    const newPosts = postsData.filter((p: any) => !existingIds.has(p._id));
+                    return [...prev, ...newPosts];
+                });
+            }
+            setHasMore(data.hasMore || false);
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching posts:", error);
+            setPosts([]);
+            setHasMore(false);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
+
+    const loadMore = useCallback(() => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchPosts(nextPage, false);
+    }, [page, type, category, debouncedSearch]);
 
     const typeSegments = [
         { id: "all", label: "All", icon: Layers },
@@ -55,7 +117,7 @@ export default function FeedContent() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-2xl md:text-3xl font-bold text-white">Discover Items</h1>
-                        {!loading && <p className="text-sm text-[var(--accent)] mt-1">{posts.length} items found</p>}
+                        {!loading && <p className="text-sm text-[var(--accent)] mt-1">{posts.length} items loaded</p>}
                     </div>
                     <Link href="/report">
                         <Button><Plus size={18} className="mr-2" />New Report</Button>
@@ -98,11 +160,26 @@ export default function FeedContent() {
                         ))}
                     </div>
                 ) : posts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {posts.map((post: any) => (
-                            <PostCard key={post._id} post={post} onDelete={fetchPosts} />
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {posts.map((post: any) => (
+                                <PostCard key={post._id} post={post} />
+                            ))}
+                        </div>
+
+                        {/* Infinite Scroll Trigger & Loading Indicator */}
+                        <div ref={observerTarget} className="flex justify-center py-8">
+                            {loadingMore && (
+                                <div className="flex items-center gap-2 text-[var(--accent)]">
+                                    <Loader2 size={20} className="animate-spin" />
+                                    <span className="text-sm">Loading more...</span>
+                                </div>
+                            )}
+                            {!hasMore && posts.length > 0 && (
+                                <p className="text-sm text-[var(--text-secondary)]">No more items to load</p>
+                            )}
+                        </div>
+                    </>
                 ) : (
                     <div className="text-center py-16">
                         <p className="text-6xl mb-4 opacity-20">🔍</p>

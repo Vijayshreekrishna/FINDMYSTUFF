@@ -42,7 +42,8 @@ export async function GET(req: NextRequest) {
         const category = searchParams.get("category");
         const search = searchParams.get("search");
         const userId = searchParams.get("userId");
-        const limit = parseInt(searchParams.get("limit") || "50");
+        const skip = parseInt(searchParams.get("skip") || "0");
+        const limit = parseInt(searchParams.get("limit") || "12");
 
         const query: any = {};
 
@@ -71,10 +72,17 @@ export async function GET(req: NextRequest) {
 
         const posts = await Post.find(query)
             .sort({ createdAt: -1 })
+            .skip(skip)
             .limit(limit)
             .populate("user", "name image email");
 
-        return NextResponse.json(posts);
+        const total = await Post.countDocuments(query);
+
+        return NextResponse.json({
+            posts,
+            hasMore: skip + posts.length < total,
+            total
+        });
     } catch (error) {
         console.error("Error fetching posts:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
