@@ -5,7 +5,7 @@ import { motion, HTMLMotionProps } from "framer-motion";
 import React from "react";
 
 interface CardProps extends HTMLMotionProps<"div"> {
-    variant?: "default" | "elevated";
+    variant?: "default" | "elevated" | "glass";
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -14,7 +14,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
         const variants = {
             default: "bg-[var(--surface)]",
-            elevated: "bg-[var(--surface)] shadow-xl"
+            elevated: "bg-[var(--surface)] shadow-xl",
+            glass: "bg-[var(--surface)]/60 backdrop-blur-lg"
         };
 
         return (
