@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
@@ -15,11 +15,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0b0b0b",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "FindMyStuff - Lost & Found",
   description: "The premium platform to connect lost items with their owners. Secure, fast, and community-driven.",
   manifest: "/manifest.json",
-  themeColor: "#0b0b0b",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "FindMyStuff",
+  },
 };
 
 export default function RootLayout({
