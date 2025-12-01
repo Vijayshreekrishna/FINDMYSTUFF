@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import InstallPrompt from "@/components/InstallPrompt";
+import PWAEnforcer from "@/components/PWAEnforcer";
 import { Header } from "@/components/layout/Header";
 
 const geistSans = Geist({
@@ -46,9 +46,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <Header />
-          {children}
-          <InstallPrompt />
+          <PWAEnforcer>
+            <Header />
+            {children}
+          </PWAEnforcer>
         </Providers>
       </body>
     </html>
