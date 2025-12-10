@@ -8,6 +8,7 @@ export default function InstallPage() {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
     const [isInstallable, setIsInstallable] = useState(false);
     const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop');
+    const [isInstalling, setIsInstalling] = useState(false);
     const instructionsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -52,14 +53,16 @@ export default function InstallPage() {
             return;
         }
 
+        setIsInstalling(true);
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
 
         if (outcome === 'accepted') {
             document.cookie = 'pwa-installed=true; path=/; max-age=31536000';
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1000);
+            // Show success message
+            alert('✅ App installed! Please open the FindMyStuff app from your home screen or app drawer.');
+        } else {
+            setIsInstalling(false);
         }
 
         setDeferredPrompt(null);
@@ -146,11 +149,12 @@ export default function InstallPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
                         onClick={handleInstall}
-                        className="w-full bg-white text-green-600 font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center gap-3 text-lg mb-6"
+                        disabled={isInstalling}
+                        className="w-full bg-white text-green-600 font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center gap-3 text-lg mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Download className="w-6 h-6" />
-                        {isInstallable ? 'Install Now' : 'See Installation Steps'}
-                        {!isInstallable && <ArrowDown className="w-5 h-5 animate-bounce" />}
+                        {isInstalling ? 'Installing...' : isInstallable ? 'Install Now' : 'See Installation Steps'}
+                        {!isInstallable && !isInstalling && <ArrowDown className="w-5 h-5 animate-bounce" />}
                     </motion.button>
 
                     {/* Installation Steps Flow */}
