@@ -15,10 +15,25 @@ export async function POST(req: NextRequest) {
         const data = await req.json();
 
         console.log("Received post data:", data);
-        console.log("Location data:", data.location);
+        console.log("Session user:", session.user);
 
         // @ts-ignore
         const userId = session.user.id; // Added in session callback
+
+        if (!userId) {
+            console.error("No user ID in session");
+            return NextResponse.json({ error: "User ID not found in session" }, { status: 400 });
+        }
+
+        // Validate required fields
+        if (!data.title || !data.description || !data.category || !data.type) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        // Ensure location has required fields
+        if (!data.location || typeof data.location.lat !== 'number' || typeof data.location.lng !== 'number') {
+            return NextResponse.json({ error: "Invalid location data" }, { status: 400 });
+        }
 
         const post = await Post.create({
             ...data,
@@ -28,9 +43,13 @@ export async function POST(req: NextRequest) {
         console.log("Created post:", post);
 
         return NextResponse.json(post, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating post:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error("Error details:", error.message, error.stack);
+        return NextResponse.json({
+            error: "Internal Server Error",
+            details: error.message
+        }, { status: 500 });
     }
 }
 
