@@ -21,6 +21,18 @@ export default function InstallPage() {
             setPlatform('desktop');
         }
 
+        // Check if in standalone mode (PWA installed and running)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+        if (isStandalone) {
+            // PWA is installed and running - set cookie and allow access
+            document.cookie = 'pwa-installed=true; path=/; max-age=31536000';
+            window.location.href = '/';
+        } else {
+            // Not in standalone mode - clear cookie to force install page
+            document.cookie = 'pwa-installed=; path=/; max-age=0';
+        }
+
         // Listen for install prompt
         const handler = (e: Event) => {
             e.preventDefault();
@@ -29,13 +41,6 @@ export default function InstallPage() {
         };
 
         window.addEventListener('beforeinstallprompt', handler);
-
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            // Set cookie to bypass middleware
-            document.cookie = 'pwa-installed=true; path=/; max-age=31536000';
-            window.location.href = '/';
-        }
 
         return () => window.removeEventListener('beforeinstallprompt', handler);
     }, []);
