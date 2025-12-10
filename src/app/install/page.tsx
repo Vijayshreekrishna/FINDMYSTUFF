@@ -26,12 +26,9 @@ export default function InstallPage() {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
         if (isStandalone) {
-            // PWA is installed and running - set cookie and allow access
-            document.cookie = 'pwa-installed=true; path=/; max-age=31536000';
+            // PWA is installed and running - redirect to home
             window.location.href = '/';
-        } else {
-            // Not in standalone mode - clear cookie to force install page
-            document.cookie = 'pwa-installed=; path=/; max-age=0';
+            return;
         }
 
         // Listen for install prompt
@@ -58,7 +55,6 @@ export default function InstallPage() {
         const { outcome } = await deferredPrompt.userChoice;
 
         if (outcome === 'accepted') {
-            document.cookie = 'pwa-installed=true; path=/; max-age=31536000';
             // Show success message
             alert('✅ App installed! Please open the FindMyStuff app from your home screen or app drawer.');
         } else {

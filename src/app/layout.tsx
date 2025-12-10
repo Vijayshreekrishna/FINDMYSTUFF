@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import PWAEnforcer from "@/components/PWAEnforcer";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import PWAGuard from "@/components/PWAGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,9 +48,11 @@ export default function RootLayout({
       >
         <Providers>
           <PWAEnforcer>
-            <ConditionalLayout>
-              {children}
-            </ConditionalLayout>
+            <PWAGuard>
+              <ConditionalLayout>
+                {children}
+              </ConditionalLayout>
+            </PWAGuard>
           </PWAEnforcer>
         </Providers>
       </body>
