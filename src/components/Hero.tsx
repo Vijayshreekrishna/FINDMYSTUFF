@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Section } from "@/components/Wrappers";
@@ -49,7 +49,9 @@ export const Hero = () => (
 
             <aside className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                 <h3 className="mb-3 text-lg font-semibold text-gray-900">Quick Search</h3>
-                <SearchBar compact />
+                <Suspense fallback={<div className="h-12 bg-gray-100 rounded-full animate-pulse" />}>
+                    <SearchBar compact />
+                </Suspense>
                 <div className="mt-4 grid grid-cols-3 gap-2">
                     {[
                         { name: "Electronics", category: "electronics" },
