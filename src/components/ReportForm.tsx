@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, X, UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 import MapPicker from "@/components/map/MapPicker";
+import { CldUploadWidget } from "next-cloudinary";
 
 export const ReportForm = () => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [images, setImages] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         title: "",
         category: "Electronics",
@@ -29,12 +31,12 @@ export const ReportForm = () => {
             const res = await fetch("/api/posts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ ...formData, images }),
             });
 
             if (!res.ok) throw new Error("Failed to create post");
 
-            router.push("/feed"); // Redirect to feed or matches
+            router.push("/feed");
             router.refresh();
         } catch (error) {
             console.error(error);
@@ -141,28 +143,47 @@ export const ReportForm = () => {
                 />
             </div>
 
-            {/* Image Upload */}
+            {/* Image Upload with Cloudinary */}
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Upload Image</label>
-                <label htmlFor="image-upload" className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 p-6 text-gray-500 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <Camera className="mr-2" size={18} />
-                    <span>Take Photo or Choose from Gallery</span>
-                    <input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        className="hidden"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                                // TODO: Upload to Cloudinary or your image storage
-                                console.log("Selected file:", file.name);
-                            }
-                        }}
-                    />
-                </label>
-                <p className="mt-2 text-xs text-gray-500">Supports camera capture on mobile devices</p>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Upload Images</label>
+                {process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ? (
+                    <div className="grid grid-cols-3 gap-3">
+                        {images.map((img) => (
+                            <div key={img} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-300">
+                                <img src={img} alt="Preview" className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => setImages(images.filter((i) => i !== img))}
+                                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white">
+                                        <X size={16} />
+                                    </div>
+                                </button>
+                            </div>
+                        ))}
+                        <CldUploadWidget
+                            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                            onSuccess={(result: any) => setImages([...images, result.info.secure_url])}
+                        >
+                            {({ open }) => (
+                                <button
+                                    type="button"
+                                    onClick={() => open()}
+                                    className="aspect-square rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-blue-600"
+                                >
+                                    <UploadCloud size={24} />
+                                    <span className="text-xs font-semibold">Upload</span>
+                                </button>
+                            )}
+                        </CldUploadWidget>
+                    </div>
+                ) : (
+                    <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm">
+                        ⚠️ Image upload disabled. Please configure Cloudinary environment variables.
+                    </div>
+                )}
+                <p className="mt-2 text-xs text-gray-500">Click to upload from camera or gallery</p>
             </div>
 
             <div className="flex items-center justify-between pt-2">
