@@ -1,39 +1,47 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import PostCard from "@/components/post-card";
-import { useDebounce } from "@/hooks/useDebounce";
-import { motion } from "framer-motion";
+// import { useDebounce } from "@/hooks/useDebounce"; // No longer needed as SearchBar handles submit
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Plus, Search as SearchIcon, ChevronDown, Layers, Search, CheckCircle, Loader2 } from "lucide-react";
+import { Plus, Search as SearchIcon, Layers, Search, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import SegmentedControl from "@/components/ui/SegmentedControl";
-import { Input } from "@/components/ui/Input";
+import { SearchBar } from "@/components/SearchBar";
 
 export default function FeedContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    // Derived state from URL
+    const search = searchParams.get("q") || "";
+    const category = searchParams.get("category") || "";
+    // We can keep 'type' (lost/found) as local state or sync it too. User likely wants basic filters first. 
+    // Let's keep 'type' local or sync it? Let's sync it for consistency since we are "enhancing".
+    const type = searchParams.get("type") || "all";
+
     const [posts, setPosts] = useState<any[]>([]);
-    const [search, setSearch] = useState("");
-    const [category, setCategory] = useState("");
-    const [type, setType] = useState("all");
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
     const observerTarget = useRef(null);
 
-    const debouncedSearch = useDebounce(search, 300);
+    // Debounce isn't strictly needed for fetch trigger if we rely on URL changes, 
+    // but the SearchBar handles the submission. We just react to URL changes.
 
     useEffect(() => {
-        // Reset to first page when filters change
+        // Reset and fetch when URL params change
         setPage(0);
         setPosts([]);
         setHasMore(true);
         fetchPosts(0, true);
-    }, [debouncedSearch, category, type]);
+    }, [search, category, type]);
 
     useEffect(() => {
-        // Set up Intersection Observer for infinite scroll
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
@@ -43,44 +51,43 @@ export default function FeedContent() {
             { threshold: 0.1 }
         );
 
-        if (observerTarget.current) {
-            observer.observe(observerTarget.current);
-        }
-
+        if (observerTarget.current) observer.observe(observerTarget.current);
         return () => {
-            if (observerTarget.current) {
-                observer.unobserve(observerTarget.current);
-            }
+            if (observerTarget.current) observer.unobserve(observerTarget.current);
         };
     }, [hasMore, loading, loadingMore, page]);
 
     const fetchPosts = async (pageNum: number, isInitial = false) => {
-        if (isInitial) {
-            setLoading(true);
-        } else {
-            setLoadingMore(true);
-        }
+        if (isInitial) setLoading(true);
+        else setLoadingMore(true);
 
         try {
             const params = new URLSearchParams();
             if (type !== "all") params.append("type", type);
             if (category) params.append("category", category);
-            if (debouncedSearch) params.append("search", debouncedSearch);
+            if (search) params.append("q", search); // match API expectation
             params.append("skip", (pageNum * 12).toString());
             params.append("limit", "12");
 
-            const res = await fetch(`/api/posts?${params.toString()}`);
+            // Note: Ensure API endpoint handles 'q' or 'search' param correctly. 
+            // Previous code used 'search', SearchBar uses 'q'. Let's standardize on 'q' or map it.
+            // The API expects 'search' based on previous code `params.append("search", debouncedSearch)`.
+            // We should map 'q' to 'search' here if API needs it.
+            // Actually, let's fix the API param key in this call:
+            const apiParams = new URLSearchParams(params);
+            if (search) {
+                apiParams.delete("q");
+                apiParams.append("search", search);
+            }
+
+            const res = await fetch(`/api/posts?${apiParams.toString()}`);
             const data = await res.json();
 
-            console.log("API Response:", data);
-
-            // Handle the new response structure
             const postsData = data.posts || [];
 
             if (isInitial) {
                 setPosts(postsData);
             } else {
-                // Filter out duplicates by checking if post._id already exists
                 setPosts(prev => {
                     const existingIds = new Set(prev.map((p: any) => p._id));
                     const newPosts = postsData.filter((p: any) => !existingIds.has(p._id));
@@ -102,7 +109,23 @@ export default function FeedContent() {
         const nextPage = page + 1;
         setPage(nextPage);
         fetchPosts(nextPage, false);
-    }, [page, type, category, debouncedSearch]);
+    }, [page, type, category, search]);
+
+    const handleTypeChange = (newType: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("type", newType);
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const handleCategoryChange = (cat: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (category === cat) {
+            params.delete("category"); // toggle off
+        } else {
+            params.set("category", cat);
+        }
+        router.push(`${pathname}?${params.toString()}`);
+    };
 
     const typeSegments = [
         { id: "all", label: "All", icon: Layers },
@@ -110,43 +133,48 @@ export default function FeedContent() {
         { id: "found", label: "Found", icon: CheckCircle }
     ];
 
+    const categories = ["Electronics", "Clothing", "Accessories", "Pets", "Documents", "Other"];
+
     return (
         <div className="min-h-screen bg-[var(--background)]">
             {/* Header */}
-            <div className="container py-6 space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="container py-8 space-y-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-white">Discover Items</h1>
-                        {!loading && <p className="text-sm text-[var(--accent)] mt-1">{posts.length} items loaded</p>}
+                        <h1 className="text-3xl font-bold text-white tracking-tight">Discover Items</h1>
+                        {!loading && <p className="text-sm text-[var(--text-secondary)] mt-1">{posts.length} results found</p>}
                     </div>
                     <Link href="/report">
-                        <Button><Plus size={18} className="mr-2" />New Report</Button>
+                        <Button className="shadow-lg shadow-[var(--accent)]/20"><Plus size={18} className="mr-2" />New Report</Button>
                     </Link>
                 </div>
 
-                {/* Filters - Centered */}
-                <div className="flex justify-center">
-                    <SegmentedControl segments={typeSegments} activeId={type} onChange={setType} />
-                </div>
+                {/* Search & Filters Area */}
+                <div className="space-y-4">
+                    {/* Search Bar */}
+                    <div className="max-w-2xl mx-auto">
+                        <SearchBar />
+                    </div>
 
-                {/* Search & Category */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                    <Input icon={SearchIcon} placeholder="Search items..." value={search} onChange={(e) => setSearch(e.target.value)} />
-                    <div className="relative">
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="flex h-[var(--input-height)] w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-input)] px-4 text-sm text-white focus-visible:outline-none focus-visible:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/20 transition-all appearance-none cursor-pointer"
-                        >
-                            <option value="">All Categories</option>
-                            <option value="Electronics">Electronics</option>
-                            <option value="Clothing">Clothing</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Pets">Pets</option>
-                            <option value="Documents">Documents</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none" />
+                    {/* Type Filters (Segmented) */}
+                    <div className="flex justify-center">
+                        <SegmentedControl segments={typeSegments} activeId={type} onChange={handleTypeChange} />
+                    </div>
+
+                    {/* Category Chips */}
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => handleCategoryChange(cat)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${category === cat
+                                    ? "bg-[var(--accent)] text-white shadow-md shadow-[var(--accent)]/25"
+                                    : "bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-highlight)] border border-[var(--border)]"
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>

@@ -67,9 +67,18 @@ interface MapProps {
     interactive?: boolean;
 }
 
+const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
+    const map = useMapEvents({});
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom, map]);
+    return null;
+};
+
 export default function Map({ center = [51.505, -0.09], zoom = 13, markers = [], onLocationSelect, interactive = true }: MapProps) {
     return (
         <MapContainer center={center} zoom={zoom} scrollWheelZoom={interactive} className="h-full w-full rounded-lg z-0">
+            <ChangeView center={center} zoom={zoom} />
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

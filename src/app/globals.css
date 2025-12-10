@@ -1,98 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  /* Colors */
-  --background: #0b0b0b;
-  --surface: #161616;
-  --surface-input: #131313;
-  --border: #242424;
-  --text-primary: #ffffff;
-  --text-secondary: #a3a3a3;
-  --accent: #a45cff;
-  --accent-hover: #b280ff;
-  --danger: #ff5c5c;
-
-  /* Spacing (8px grid) */
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 40px;
-  --space-6: 48px;
-  --space-8: 64px;
-
-  /* Component Sizes */
-  --input-height: 48px;
-  --button-height: 52px;
-  --navbar-height: 64px;
-  --segment-height: 44px;
-
-  /* Border Radii */
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
-
-  /* Max Widths */
-  --max-width-content: 1180px;
-  --max-width-form: 780px;
-
-  /* Legacy */
-  --foreground: var(--text-primary);
-  --primary: var(--accent);
-  --radius: var(--radius-md);
+@theme {
+    --color-blue-50: #CFFFDC;
+    --color-blue-100: #A8E6C0;
+    --color-blue-400: #68BA7F;
+    --color-blue-500: #4DA064;
+    --color-blue-600: #2E6F40;
+    --color-blue-700: #255A33;
+    --color-blue-900: #253D2C;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@layer utilities {
+    .border-thin {
+        border-width: 0.4px;
+    }
 
-body {
-  color: var(--text-primary);
-  background: var(--background);
-  font-family: var(--font-geist-sans), 'Inter', 'Manrope', -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  padding-top: var(--navbar-height);
-}
-
-/* Utility Classes */
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent) 0%, #b280ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.shadow-glow {
-  box-shadow: 0 0 20px rgba(164, 92, 255, 0.3);
-}
-
-.no-scroll {
-  overflow: hidden;
-}
-
-/* Container */
-.container {
-  width: 100%;
-  max-width: var(--max-width-content);
-  margin: 0 auto;
-  padding: 0 var(--space-2);
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding: 0 var(--space-3);
-  }
-}
-
-/* Form Container */
-.form-container {
-  width: 100%;
-  max-width: var(--max-width-form);
-  margin: 0 auto;
+    .ring-thin {
+        box-shadow: 0 0 0 0.4px var(--tw-ring-color, currentColor);
+    }
 }

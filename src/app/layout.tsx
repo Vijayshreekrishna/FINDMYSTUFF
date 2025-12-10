@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import PWAEnforcer from "@/components/PWAEnforcer";
-import { Header } from "@/components/layout/Header";
+import Navbar from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0b0b0b",
+  themeColor: "#2E6F40",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -42,13 +43,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F9FAFB] text-gray-900`}
         suppressHydrationWarning
       >
         <Providers>
           <PWAEnforcer>
-            <Header />
+            <Navbar />
             {children}
+            <Footer />
           </PWAEnforcer>
         </Providers>
       </body>
