@@ -13,22 +13,17 @@ export function middleware(request: NextRequest) {
         pathname.startsWith('/register') ||
         pathname.startsWith('/icon') ||
         pathname.startsWith('/manifest') ||
+        pathname.startsWith('/offline') ||
         pathname.includes('.')
     ) {
         return NextResponse.next();
     }
 
-    // Check if user is in PWA mode (standalone)
-    const userAgent = request.headers.get('user-agent') || '';
-    const isStandalone = request.headers.get('sec-fetch-dest') === 'document' &&
-        request.headers.get('sec-fetch-mode') === 'navigate';
+    // Check if PWA is installed (cookie set after installation)
+    const isPWAInstalled = request.cookies.get('pwa-installed')?.value === 'true';
 
-    // Check for PWA indicators in user agent or referrer
-    const isPWA = userAgent.includes('wv') || // WebView
-        request.cookies.get('pwa-installed')?.value === 'true';
-
-    // If not in PWA mode, redirect to install page
-    if (!isPWA && pathname !== '/install') {
+    // If not installed, redirect to install page
+    if (!isPWAInstalled) {
         const url = request.nextUrl.clone();
         url.pathname = '/install';
         return NextResponse.redirect(url);
