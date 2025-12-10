@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Smartphone, Monitor, CheckCircle, Zap, Shield, Wifi } from "lucide-react";
+import { Download, Smartphone, ArrowRight, CheckCircle, Zap, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function InstallPage() {
@@ -57,50 +57,75 @@ export default function InstallPage() {
 
     const features = [
         { icon: Zap, title: "Lightning Fast", desc: "Instant loading and smooth performance" },
-        { icon: Wifi, title: "Offline Access", desc: "Use the app even without internet" },
         { icon: Shield, title: "Secure & Private", desc: "Your data stays safe and encrypted" },
     ];
 
+    const getInstructions = () => {
+        if (platform === 'ios') {
+            return [
+                { step: 1, text: "Tap the Share button", icon: "📤", detail: "Look for the share icon at the bottom of Safari" },
+                { step: 2, text: "Scroll and find 'Add to Home Screen'", icon: "📱", detail: "Scroll down in the share menu" },
+                { step: 3, text: "Tap 'Add' to confirm", icon: "✅", detail: "Tap 'Add' in the top right corner" },
+            ];
+        } else if (platform === 'android') {
+            return [
+                { step: 1, text: "Tap the menu (⋮)", icon: "⋮", detail: "Look for three dots in Chrome" },
+                { step: 2, text: "Select 'Install app'", icon: "📲", detail: "Or 'Add to Home screen'" },
+                { step: 3, text: "Tap 'Install'", icon: "✅", detail: "Confirm the installation" },
+            ];
+        } else {
+            return [
+                { step: 1, text: "Find install icon", icon: "⬇️", detail: "Look in your browser's address bar" },
+                { step: 2, text: "Click 'Install'", icon: "💻", detail: "When the prompt appears" },
+                { step: 3, text: "Launch the app", icon: "🚀", detail: "App opens in its own window" },
+            ];
+        }
+    };
+
+    const instructions = getInstructions();
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
-            <div className="max-w-4xl w-full">
+        <div className="min-h-screen bg-gradient-to-br from-green-600 via-emerald-600 to-teal-500 flex items-center justify-center p-4 overflow-auto">
+            <div className="max-w-5xl w-full py-8">
                 {/* Main Card */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-2xl border border-white/20"
+                    className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 md:p-10 shadow-2xl border border-white/20"
                 >
                     {/* Header */}
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-10">
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring" }}
-                            className="w-24 h-24 mx-auto mb-6 bg-white rounded-3xl shadow-lg flex items-center justify-center"
+                            className="w-20 h-20 mx-auto mb-6 bg-white rounded-3xl shadow-lg flex items-center justify-center"
                         >
-                            <Smartphone className="w-12 h-12 text-blue-600" />
+                            <Smartphone className="w-10 h-10 text-green-600" />
                         </motion.div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+                        <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-3">
                             Install FindMyStuff
                         </h1>
-                        <p className="text-xl text-white/80 max-w-2xl mx-auto">
-                            Get the best experience with our Progressive Web App. Fast, reliable, and works offline!
+                        <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
+                            Get the best experience with our app!
                         </p>
                     </div>
 
                     {/* Features */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                         {features.map((feature, index) => (
                             <motion.div
                                 key={feature.title}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.3 + index * 0.1 }}
-                                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+                                className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 flex items-center gap-4"
                             >
-                                <feature.icon className="w-10 h-10 text-white mb-4" />
-                                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                                <p className="text-white/70 text-sm">{feature.desc}</p>
+                                <feature.icon className="w-8 h-8 text-white flex-shrink-0" />
+                                <div>
+                                    <h3 className="text-base font-bold text-white mb-1">{feature.title}</h3>
+                                    <p className="text-white/70 text-sm">{feature.desc}</p>
+                                </div>
                             </motion.div>
                         ))}
                     </div>
@@ -110,81 +135,59 @@ export default function InstallPage() {
                         <motion.button
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.6 }}
+                            transition={{ delay: 0.5 }}
                             onClick={handleInstall}
-                            className="w-full bg-white text-blue-600 font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center gap-3 text-lg"
+                            className="w-full bg-white text-green-600 font-bold py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center gap-3 text-lg mb-6"
                         >
                             <Download className="w-6 h-6" />
                             Install Now
                         </motion.button>
-                    ) : (
-                        <div className="space-y-6">
-                            {/* Platform-specific instructions */}
-                            {platform === 'ios' && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                                    <h3 className="text-xl font-bold text-white mb-4">Install on iOS</h3>
-                                    <ol className="space-y-3 text-white/80">
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">1</span>
-                                            <span>Tap the Share button at the bottom of Safari</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">2</span>
-                                            <span>Scroll down and tap "Add to Home Screen"</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">3</span>
-                                            <span>Tap "Add" in the top right corner</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            )}
+                    ) : null}
 
-                            {platform === 'android' && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                                    <h3 className="text-xl font-bold text-white mb-4">Install on Android</h3>
-                                    <ol className="space-y-3 text-white/80">
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">1</span>
-                                            <span>Tap the menu button (three dots) in Chrome</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">2</span>
-                                            <span>Tap "Install app" or "Add to Home screen"</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">3</span>
-                                            <span>Tap "Install" to confirm</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            )}
+                    {/* Installation Steps Flow */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                        <h3 className="text-xl font-bold text-white mb-6 text-center">
+                            {platform === 'ios' ? '📱 iOS Installation' : platform === 'android' ? '🤖 Android Installation' : '💻 Desktop Installation'}
+                        </h3>
 
-                            {platform === 'desktop' && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                                    <h3 className="text-xl font-bold text-white mb-4">Install on Desktop</h3>
-                                    <ol className="space-y-3 text-white/80">
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">1</span>
-                                            <span>Look for the install icon in your browser's address bar</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">2</span>
-                                            <span>Click "Install" when prompted</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-sm">3</span>
-                                            <span>The app will open in its own window</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            )}
+                        <div className="space-y-4">
+                            {instructions.map((instruction, index) => (
+                                <motion.div
+                                    key={instruction.step}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.6 + index * 0.1 }}
+                                    className="relative"
+                                >
+                                    {/* Connector Line */}
+                                    {index < instructions.length - 1 && (
+                                        <div className="absolute left-6 top-14 w-0.5 h-8 bg-white/30" />
+                                    )}
+
+                                    <div className="flex items-start gap-4">
+                                        {/* Step Number Circle */}
+                                        <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/40">
+                                            <span className="text-2xl">{instruction.icon}</span>
+                                        </div>
+
+                                        {/* Step Content */}
+                                        <div className="flex-1 pt-1">
+                                            <h4 className="text-white font-bold text-lg mb-1">
+                                                {instruction.text}
+                                            </h4>
+                                            <p className="text-white/70 text-sm">
+                                                {instruction.detail}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
                         </div>
-                    )}
+                    </div>
 
                     {/* Footer */}
-                    <p className="text-center text-white/60 text-sm mt-8">
-                        Installing the app gives you the best experience with faster loading and offline access
+                    <p className="text-center text-white/70 text-sm mt-8">
+                        🚀 Once installed, you'll enjoy faster loading and offline access
                     </p>
                 </motion.div>
             </div>
