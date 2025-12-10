@@ -141,12 +141,28 @@ export const ReportForm = () => {
                 />
             </div>
 
-            {/* Image Upload Placeholder - requires configured backend/cloudinary */}
+            {/* Image Upload */}
             <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">Upload Image</label>
-                <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 p-6 text-gray-500 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <Camera className="mr-2" size={18} /> Image upload coming soon
-                </div>
+                <label htmlFor="image-upload" className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 p-6 text-gray-500 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <Camera className="mr-2" size={18} />
+                    <span>Take Photo or Choose from Gallery</span>
+                    <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                                // TODO: Upload to Cloudinary or your image storage
+                                console.log("Selected file:", file.name);
+                            }
+                        }}
+                    />
+                </label>
+                <p className="mt-2 text-xs text-gray-500">Supports camera capture on mobile devices</p>
             </div>
 
             <div className="flex items-center justify-between pt-2">

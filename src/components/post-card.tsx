@@ -77,6 +77,13 @@ export default function PostCard({ post, onDelete }: PostProps) {
                             <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         </div>
 
+                        {/* Post Owner */}
+                        {post.user?.name && (
+                            <div className="flex items-center gap-1.5 text-xs text-white/80 mb-2">
+                                <span className="font-medium">By {post.user.name}</span>
+                            </div>
+                        )}
+
                         <h3 className="text-xl font-bold leading-tight mb-1 line-clamp-1 group-hover:text-[var(--accent)] transition-colors">{post.title}</h3>
                         <p className="text-sm text-white/80 font-light mb-2 line-clamp-1">{post.description}</p>
 

@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import PostMap from "@/components/map/PostMap";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Calendar, User } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, Trash2, Loader2 } from "lucide-react";
 
 interface PostDetailClientProps {
     post: any;
@@ -13,6 +14,7 @@ interface PostDetailClientProps {
 export default function PostDetailClient({ post }: PostDetailClientProps) {
     const router = useRouter();
     const { data: session } = useSession();
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // @ts-ignore
     const sessionUserId = session?.user?.id?.toString();
@@ -20,6 +22,25 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
     const isOwner = sessionUserId && postUserId && sessionUserId === postUserId;
 
     const image = post.images?.[0] || post.image;
+
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this post?")) return;
+
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
+            if (res.ok) {
+                router.push("/feed");
+            } else {
+                alert("Failed to delete post");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error deleting post");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
@@ -57,8 +78,8 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                         {/* Header: Type Badge & Date */}
                         <div className="flex flex-wrap items-center gap-3 mb-4">
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${post.type === 'lost'
-                                    ? 'bg-red-50 text-red-600 border border-red-100'
-                                    : 'bg-green-50 text-green-600 border border-green-100'
+                                ? 'bg-red-50 text-red-600 border border-red-100'
+                                : 'bg-green-50 text-green-600 border border-green-100'
                                 }`}>
                                 {post.type}
                             </span>
@@ -111,8 +132,22 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                         {/* Action Buttons (if Owner) */}
                         {isOwner && (
                             <div className="mt-8 pt-8 border-t border-gray-100 flex justify-end">
-                                <button className="px-6 py-2 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-100 transition-colors">
-                                    Delete Post
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    className="px-6 py-2 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Trash2 size={16} />
+                                            Delete Post
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         )}

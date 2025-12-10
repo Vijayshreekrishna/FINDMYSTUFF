@@ -138,10 +138,10 @@ export default function FeedContent() {
     return (
         <div className="min-h-screen bg-[var(--background)]">
             {/* Header */}
-            <div className="container py-8 space-y-6">
+            <div className="container mx-auto py-8 space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Discover Items</h1>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Discover Items</h1>
                         {!loading && <p className="text-sm text-[var(--text-secondary)] mt-1">{posts.length} results found</p>}
                     </div>
                     <Link href="/report">
