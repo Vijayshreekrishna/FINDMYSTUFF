@@ -15,7 +15,7 @@ export const BottomNav = () => {
 
     const navItems = [
         { icon: Home, label: "Home", href: "/" },
-        { icon: Search, label: "Search", href: "/search" },
+        { icon: Search, label: "Search", href: "/feed" },
         { icon: PlusCircle, label: "Report", href: "/report" },
         { icon: User, label: "Profile", href: "/profile" },
     ];
