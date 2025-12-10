@@ -180,16 +180,16 @@ export default function FeedContent() {
             </div>
 
             {/* Posts Grid */}
-            <div className="container pb-8">
+            <div className="container mx-auto px-4 pb-20 max-w-7xl">
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                             <Skeleton key={i} className="h-80 w-full rounded-[var(--radius-lg)]" />
                         ))}
                     </div>
                 ) : posts.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {posts.map((post: any) => (
                                 <PostCard key={post._id} post={post} />
                             ))}
