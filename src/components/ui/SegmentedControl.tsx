@@ -25,7 +25,7 @@ export default function SegmentedControl({ segments, activeId, onChange, classNa
                     <button
                         key={segment.id}
                         onClick={() => onChange(segment.id)}
-                        className={`relative flex items-center justify-center gap-2 px-4 h-[var(--segment-height)] text-sm font-semibold transition-colors rounded-[var(--radius-sm)] ${isActive ? "text-white" : "text-[var(--text-secondary)] hover:text-white"
+                        className={`relative flex items-center justify-center gap-2 px-4 h-[var(--segment-height)] text-sm font-semibold transition-colors rounded-[var(--radius-sm)] ${isActive ? "text-white" : "text-[var(--text-secondary)] hover:text-green-300"
                             }`}
                     >
                         {isActive && (
