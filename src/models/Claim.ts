@@ -8,7 +8,6 @@ export interface IClaim extends Document {
     score: number;
     answers: Record<string, any>;
     evidenceImage?: string;
-    evidenceImage?: string;
     handoffCodeHash?: string;
     fingerprint?: string;
     expiresAt: Date;
