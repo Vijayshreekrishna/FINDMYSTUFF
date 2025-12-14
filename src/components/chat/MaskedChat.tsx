@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { Send, Lock, RotateCcw } from "lucide-react";
