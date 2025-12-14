@@ -2,142 +2,108 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { Check, X, MessageSquare, Shield } from "lucide-react";
+import { MessageSquare, Check, X, Bell } from "lucide-react";
 
-interface Claim {
-    _id: string;
-    post: {
-        _id: string;
-        title: string;
-        images: string[];
-    };
-    status: string;
-    score: number;
-    answers: Record<string, any>; // Add answers to interface
-    verificationStatus: string; // Add verificationStatus
-    createdAt: string;
-}
-
-export default function FinderClaimsPage() {
-    const [claims, setClaims] = useState<Claim[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function ReceivedClaimsPage() {
+    const [claims, setClaims] = useState<any[] | null>(null);
+    const [err, setErr] = useState<string | null>(null);
 
     useEffect(() => {
-        // This should actually fetch claims on MY posts
-        // We didn't implement GET /api/claims/incoming yet!
-        // `GET /api/claims/my` listed claims I MADE.
-        // We need `GET /api/claims/incoming` (Claims on my posts).
-
-        // Let's implement that in a separate API call later or assume it exists.
-        // For now, I'll mock calling a hypothetical `incoming` endpoint 
-        // OR filtering from `GET /api/posts/my/claims` ?
-
-        // Wait, the plan said "Finder Dashboard".
-        // I will quick-add endpoint for incoming claims or just mock it here if I missed it.
-        // The plan had `GET /api/claims/my` (List claims for current user -> could serve both roles or just claimant).
-        // Let's assume we need to fetch claims WHERE post.user == me.
-        // I'll add `GET /api/claims/incoming` quickly in next step.
-        fetch("/api/claims/incoming")
-            .then(async res => {
-                if (res.ok) {
-                    const data = await res.json();
-                    setClaims(data.claims);
+        fetch("/api/claims/received")
+            .then(r => r.ok ? r.json() : Promise.reject(r))
+            .then(setClaims)
+            .catch(async (e) => {
+                try {
+                    const msg = await e.text();
+                    setErr(msg || "Failed to load");
+                } catch {
+                    setErr(e?.statusText || "Failed to load");
                 }
-            })
-            .finally(() => setLoading(false));
+            });
     }, []);
 
-    const handleDecision = async (id: string, status: 'approved' | 'rejected') => {
-        await fetch(`/api/claims/${id}/decision`, {
-            method: 'POST',
-            body: JSON.stringify({ status })
-        });
-        // Refresh
-        setClaims(prev => prev.map(c => c._id === id ? { ...c, status } : c));
-    };
-
-    if (loading) return <div className="p-8">Loading claims...</div>;
+    if (err) return <div className="p-6 text-red-600 bg-red-50 rounded-xl m-4">{err}</div>;
 
     return (
-        <div className="container mx-auto p-4 md:p-8">
-            <h1 className="text-3xl font-bold mb-6">Incoming Claims</h1>
-
-            <div className="space-y-6">
-                {claims.length === 0 && <p>No active claims on your items.</p>}
-
-                {claims.map(claim => (
-                    <div key={claim._id} className="bg-white dark:bg-zinc-900 border rounded-lg p-6 shadow-sm">
-                        <div className="flex justify-between items-start">
-                            <div className="flex gap-4">
-                                {claim.post.images[0] && (
-                                    <img src={claim.post.images[0]} className="w-16 h-16 rounded object-cover" alt="" />
-                                )}
-                                <div>
-                                    <h3 className="font-bold text-lg">{claim.post.title}</h3>
-                                    <p className="text-sm text-zinc-500">Claimed {format(new Date(claim.createdAt), 'PPP')}</p>
-                                    <div className="flex gap-2 mt-2">
-                                        <span className={`px-2 py-0.5 rounded text-xs ${claim.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                claim.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                    'bg-red-100 text-red-800'
-                                            }`}>
-                                            {claim.status.toUpperCase()}
-                                        </span>
-                                        <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
-                                            Score: {claim.score}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            {claim.status === 'pending' && (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleDecision(claim._id, 'approved')}
-                                        className="p-2 border border-green-200 bg-green-50 text-green-600 rounded hover:bg-green-100"
-                                    >
-                                        <Check size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDecision(claim._id, 'rejected')}
-                                        className="p-2 border border-red-200 bg-red-50 text-red-600 rounded hover:bg-red-100"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Details */}
-                        <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-800 rounded">
-                            <p className="text-sm font-semibold mb-2">Claimant Answers:</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                {Object.entries(claim.answers || {}).map(([k, v]) => (
-                                    <div key={k}>
-                                        <span className="text-zinc-500 capitalize">{k.replace(/([A-Z])/g, ' $1')}:</span>
-                                        <p>{String(v)}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="mt-4 flex justify-between items-center">
-                            <p className="text-xs text-zinc-400">Trust Score: {claim.score > 50 ? 'High' : 'Low'}</p>
-                            {claim.status !== 'rejected' && (
-                                <Link
-                                    href={`/messages/${claim._id}`} // Assuming we route to thread
-                                    className="flex items-center gap-2 text-blue-600 hover:underline"
-                                >
-                                    <MessageSquare size={16} />
-                                    Open Chat
-                                </Link>
-                            )}
-                        </div>
-                    </div>
-                ))}
+        <div className="p-6 space-y-6 max-w-5xl mx-auto">
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <Bell size={24} />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Incoming Claims</h1>
+                    <p className="text-gray-500 text-sm">Review claims on items you found</p>
+                </div>
             </div>
+
+            {claims === null ? (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+            ) : claims.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
+                    <p className="text-gray-500 font-medium">No active claims yet.</p>
+                    <p className="text-sm text-gray-400 mt-1">When someone claims your found item, it will appear here.</p>
+                </div>
+            ) : (
+                <ul className="grid gap-4">
+                    {claims.map((c) => (
+                        <li key={c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between md:justify-start gap-4 mb-2">
+                                        <h3 className="font-semibold text-lg text-gray-900">{c.post?.title ?? "Item"}</h3>
+                                        <StatusBadge status={c.status} />
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 overflow-hidden">
+                                            {c.claimant?.image ? (
+                                                <img src={c.claimant.image} alt={c.claimant.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                c.claimant?.name?.[0]?.toUpperCase() || "U"
+                                            )}
+                                        </div>
+                                        <span className="font-medium">Claimant:</span> {c.claimant?.email || "Anonymous"}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
+                                    {c.chatThread ? (
+                                        <Link href={`/threads/${c.chatThread}`} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                                            <MessageSquare size={16} /> Chat & Verify
+                                        </Link>
+                                    ) : (
+                                        <span className="text-sm text-gray-400 italic px-2">Chat unavailable</span>
+                                    )}
+                                    {/* Approval Actions Placeholder - can be enabled later
+                  <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Quick Approve">
+                    <Check size={20} />
+                  </button>
+                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Quick Reject">
+                    <X size={20} />
+                  </button>
+                  */}
+                                </div>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
+    );
+}
+
+function StatusBadge({ status }: { status: string }) {
+    const styles: any = {
+        pending: "bg-blue-50 text-blue-700 border-blue-200",
+        approved: "bg-green-50 text-green-700 border-green-200",
+        rejected: "bg-red-50 text-red-700 border-red-200",
+        expired: "bg-gray-50 text-gray-600 border-gray-200",
+    };
+
+    return (
+        <span className={`text-xs px-2.5 py-1 rounded-full font-medium border ${styles[status] || styles.pending} capitalize`}>
+            {status}
+        </span>
     );
 }

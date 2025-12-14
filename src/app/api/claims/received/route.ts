@@ -16,10 +16,20 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Claims I (as owner/claimant) submitted
+        // Posts created by me (as finder / post owner)
         // @ts-ignore
-        const claims = await Claim.find({ claimant: session.user.id })
-            .populate({ path: "post", select: "title status images" })
+        const myPosts = await Post.find({ user: session.user.id })
+            .select("_id")
+            .lean();
+
+        const myPostIds = myPosts.map((p: any) => p._id);
+        if (myPostIds.length === 0) return NextResponse.json([]);
+
+        const claims = await Claim.find({ post: { $in: myPostIds } })
+            .populate([
+                { path: "post", select: "title status images type" },
+                { path: "claimant", select: "name email image" },
+            ])
             .sort({ createdAt: -1 })
             .lean();
 
@@ -27,7 +37,7 @@ export async function GET() {
         const claimIds = claims.map((c: any) => c._id);
         const threads = await ChatThread.find({ claim: { $in: claimIds } }).select("claim _id").lean();
 
-        // Create a map of claimId -> threadId
+        // Map claimId -> threadId
         const threadMap = new Map();
         threads.forEach((t: any) => {
             threadMap.set(t.claim.toString(), t._id.toString());
@@ -40,7 +50,7 @@ export async function GET() {
 
         return NextResponse.json(enrichedClaims);
     } catch (e: any) {
-        console.error("Error fetching my claims:", e);
+        console.error("Error fetching received claims:", e);
         return NextResponse.json({ error: e?.message ?? "Server error" }, { status: 500 });
     }
 }
