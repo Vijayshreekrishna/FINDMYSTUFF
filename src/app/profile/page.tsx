@@ -37,30 +37,17 @@ export default async function ProfilePage() {
 
             {/* Claim Management Links */}
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                    {/* My Claim Requests (as Owner/Claimant) */}
+                <div className="grid md:grid-cols-1 gap-4">
+                    {/* Unified Claim Management */}
                     <Link
                         href="/profile/claims"
                         className="block rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50 transition shadow-sm"
                     >
                         <h3 className="font-semibold text-green-700 flex items-center gap-2">
-                            🧾 My Claim Requests
+                            🧾 Claim Management
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
-                            View and track the items you’ve claimed as lost.
-                        </p>
-                    </Link>
-
-                    {/* Received Claims (as Finder) */}
-                    <Link
-                        href="/dashboard/claims"
-                        className="block rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50 transition shadow-sm"
-                    >
-                        <h3 className="font-semibold text-green-700 flex items-center gap-2">
-                            📬 Received Claims
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                            Manage requests for the items you found and posted.
+                            Track your lost items and manage requests for items you found.
                         </p>
                     </Link>
                 </div>
