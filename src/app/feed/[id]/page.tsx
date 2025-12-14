@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/db";
 import Post from "@/models/Post";
+import "@/models/User"; // Ensure User model is registered for populate
 import { notFound } from "next/navigation";
 import PostDetailClient from "./PostDetailClient";
 
