@@ -5,6 +5,7 @@ import dbConnect from "@/lib/db";
 import Claim from "@/models/Claim";
 import ChatThread from "@/models/ChatThread";
 import Post from "@/models/Post";
+import { Types } from "mongoose";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
