@@ -1,22 +1,31 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-// Create a new ratelimiter, that allows 10 requests per 10 seconds
-const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+const url = process.env.UPSTASH_REDIS_REST_URL;
+const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-export const ratelimit = new Ratelimit({
+let redis: Redis | null = null;
+if (url && token) {
+    redis = new Redis({ url, token });
+} else {
+    console.warn("UPSTASH credentials missing. Rate limiting disabled.");
+}
+
+// Dummy limiter if Redis is missing
+const dummyLimiter = {
+    limit: async () => ({ success: true, limit: 10, remaining: 10, reset: 0 }),
+};
+
+export const ratelimit = redis ? new Ratelimit({
     redis: redis,
     limiter: Ratelimit.slidingWindow(10, "10 s"),
     analytics: true,
     prefix: "@upstash/ratelimit",
-});
+}) : dummyLimiter;
 
-export const claimRateLimit = new Ratelimit({
+export const claimRateLimit = redis ? new Ratelimit({
     redis: redis,
     limiter: Ratelimit.slidingWindow(5, "1 d"), // 5 claims per day
     analytics: true,
     prefix: "ratelimit:claims",
-});
+}) : dummyLimiter;

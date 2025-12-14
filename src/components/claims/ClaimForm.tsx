@@ -69,52 +69,53 @@ export default function ClaimForm({ postId, onSuccess, onCancel }: ClaimFormProp
     };
 
     return (
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-xl max-w-lg w-full">
-            <h2 className="text-2xl font-bold mb-4">Claim this Item</h2>
+        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-lg w-full border border-gray-100">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">Claim this Item</h2>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div>
-                    <label className="block text-sm font-medium mb-1">When did you lose it?</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">When did you lose it?</label>
                     <input
                         type="date"
                         {...register("dateLost")}
-                        className="w-full p-2 border rounded dark:bg-zinc-800"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                     />
-                    {errors.dateLost && <p className="text-red-500 text-sm">{errors.dateLost.message}</p>}
+                    {errors.dateLost && <p className="text-red-500 text-sm mt-1">{errors.dateLost.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-1">Where did you lose it? (Be specific)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Where did you lose it? (Be specific)</label>
                     <textarea
                         {...register("locationDetails")}
-                        className="w-full p-2 border rounded dark:bg-zinc-800"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 resize-none"
+                        rows={3}
                         placeholder="e.g., Near the main entrance, on the bench..."
                     />
-                    {errors.locationDetails && <p className="text-red-500 text-sm">{errors.locationDetails.message}</p>}
+                    {errors.locationDetails && <p className="text-red-500 text-sm mt-1">{errors.locationDetails.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-1">Describe the item (Unique features)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Describe the item (Unique features)</label>
                     <textarea
                         {...register("description")}
-                        className="w-full p-2 border rounded dark:bg-zinc-800 h-24"
-                        placeholder="Scratches, colors, contents..."
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 h-24 resize-none"
+                        placeholder="Scratches, specific contents, unique marks..."
                     />
-                    {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+                    {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
                 </div>
 
-                <div className="flex justify-end gap-3 mt-6">
+                <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-100">
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="px-4 py-2 rounded text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        className="px-5 py-2.5 rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                        className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-lg shadow-blue-200"
                     >
                         {isSubmitting ? "Submitting..." : "Submit Claim"}
                     </button>

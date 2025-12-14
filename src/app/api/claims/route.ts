@@ -25,9 +25,14 @@ export async function POST(req: NextRequest) {
 
         // Rate Limiting
         const ip = req.headers.get("x-forwarded-for") || "unknown";
-        const { success } = await claimRateLimit.limit(`claim_${session.user.email}_${ip}`);
-        if (!success) {
-            return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+        try {
+            const { success } = await claimRateLimit.limit(`claim_${session.user.email}_${ip}`);
+            if (!success) {
+                return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+            }
+        } catch (rlError) {
+            console.warn("Rate limit failed, proceeding anyway:", rlError);
+            // Default to allowing if rate limiter fails (e.g. upstash credentials missing)
         }
 
         const body = await req.json();
@@ -98,6 +103,10 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error("Error creating claim:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        if (error.stack) console.error(error.stack);
+        return NextResponse.json({
+            error: "Internal Server Error",
+            details: error.message || String(error)
+        }, { status: 500 });
     }
 }
