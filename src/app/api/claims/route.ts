@@ -12,7 +12,7 @@ import { z } from "zod";
 
 const createClaimSchema = z.object({
     postId: z.string(),
-    answers: z.record(z.any()),
+    answers: z.record(z.string(), z.any()),
     evidenceImage: z.string().optional(),
 });
 
