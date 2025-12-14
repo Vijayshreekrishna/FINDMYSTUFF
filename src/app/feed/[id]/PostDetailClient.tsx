@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import PostMap from "@/components/map/PostMap";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Calendar, User, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, Trash2, Loader2, HandMetal } from "lucide-react";
+import ClaimForm from "@/components/claims/ClaimForm";
 
 interface PostDetailClientProps {
     post: any;
@@ -15,11 +16,21 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
     const router = useRouter();
     const { data: session } = useSession();
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showClaimForm, setShowClaimForm] = useState(false);
 
     // @ts-ignore
     const sessionUserId = session?.user?.id?.toString();
     const postUserId = post.user?._id?.toString() || post.user?.toString();
     const isOwner = sessionUserId && postUserId && sessionUserId === postUserId;
+    // Basic logic: You claim items that are "Found" (because you lost them)
+    // Or you can claim a "Lost" item saying "I found it"?
+    // Usually "Lost & Found" app:
+    // 1. I Lost X -> I Post "Lost X". Use "I Found It" to resolve (handled by owner).
+    // 2. I Found Y -> I Post "Found Y". Someone claims "That's mine!" (Claims flow).
+    // So Claim button appears on "Found" items for non-owners?
+    // User request didn't strictly specify, but "finder <-> owner" implies finder has item.
+    // So "Claim" is for items of type 'found'.
+    const canClaim = !isOwner && post.type === 'found' && sessionUserId;
 
     const image = post.images?.[0] || post.image;
 
@@ -56,7 +67,8 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                     </Link>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
+
                     {/* Hero Image Section */}
                     {image ? (
                         <div className="w-full bg-gray-100 flex justify-center items-center overflow-hidden h-[400px] sm:h-[500px]">
@@ -129,9 +141,9 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                             )}
                         </div>
 
-                        {/* Action Buttons (if Owner) */}
-                        {isOwner && (
-                            <div className="mt-8 pt-8 border-t border-gray-100 flex justify-end">
+                        {/* Action Buttons */}
+                        <div className="mt-8 pt-8 border-t border-gray-100 flex justify-end gap-3">
+                            {isOwner && (
                                 <button
                                     onClick={handleDelete}
                                     disabled={isDeleting}
@@ -149,9 +161,37 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                                         </>
                                     )}
                                 </button>
-                            </div>
-                        )}
+                            )}
+
+                            {canClaim && (
+                                <button
+                                    onClick={() => setShowClaimForm(true)}
+                                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-200"
+                                >
+                                    <HandMetal size={18} />
+                                    Claim This Item
+                                </button>
+                            )}
+                        </div>
                     </div>
+
+                    {/* Claim Modal Overlay */}
+                    {showClaimForm && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                            <div className="w-full max-w-lg">
+                                <ClaimForm
+                                    postId={post._id}
+                                    onCancel={() => setShowClaimForm(false)}
+                                    onSuccess={(claimId) => {
+                                        setShowClaimForm(false);
+                                        // Redirect to messages/claim_thread or success?
+                                        router.push(`/dashboard/claims`); // Or similar
+                                        alert("Claim submitted! Check your dashboard.");
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

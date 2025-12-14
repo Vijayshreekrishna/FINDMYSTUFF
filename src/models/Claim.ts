@@ -1,0 +1,47 @@
+import { Schema, model, models, type Document, type Model } from 'mongoose';
+
+export interface IClaim extends Document {
+    post: Schema.Types.ObjectId;
+    claimant: Schema.Types.ObjectId;
+    status: 'pending' | 'approved' | 'rejected' | 'expired';
+    verificationStatus: 'unverified' | 'email_verified' | 'fully_verified';
+    score: number;
+    answers: Record<string, any>;
+    evidenceImage?: string;
+    handoffCodeHash?: string;
+    expiresAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const ClaimSchema = new Schema<IClaim>(
+    {
+        post: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
+        claimant: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected', 'expired'],
+            default: 'pending',
+        },
+        verificationStatus: {
+            type: String,
+            enum: ['unverified', 'email_verified', 'fully_verified'],
+            default: 'unverified',
+        },
+        score: { type: Number, default: 0 },
+        answers: { type: Map, of: Schema.Types.Mixed, default: {} },
+        evidenceImage: { type: String },
+        handoffCodeHash: { type: String },
+        expiresAt: { type: Date, required: true },
+    },
+    { timestamps: true }
+);
+
+// Prevent duplicate claims for same post by same user
+ClaimSchema.index({ post: 1, claimant: 1 }, { unique: true });
+// TTL index for expiration
+ClaimSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+const Claim = (models.Claim as Model<IClaim>) || model<IClaim>('Claim', ClaimSchema);
+
+export default Claim;

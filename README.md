@@ -53,7 +53,14 @@ Visit `http://localhost:3000` to see the app.
 
 ### Environment Variables
 
-See `env_template.txt` for required environment variables.
+### 2. Finder-Owner Connection (Free Tier) - [NEW]
+- **Claim System**: Claim items with detailed forms and scoring.
+- **Masked Chat**: Privacy-first chat with SSE streaming and short-poll fallback.
+- **Handoff Verification**: Secure 6-digit code for physical item exchange.
+- **Reputation System**: Reliability scores and verification badges.
+- **Rate Limiting**: Upstash Redis protection.
+
+See `env_template.txt` for required environment variables (`UPSTASH_*`, `RESEND_API_KEY`, etc).
 
 ## Deployment
 
