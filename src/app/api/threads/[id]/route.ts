@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/lib/db";
 import ChatThread from "@/models/ChatThread";
 import Message from "@/models/Message";
+import { Types } from "mongoose";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const messages = await Message.find({ thread: id })
+        const messages = await Message.find({ thread: new Types.ObjectId(id) as any })
             .sort({ createdAt: 1 }) // Oldest first
             .limit(50);
 

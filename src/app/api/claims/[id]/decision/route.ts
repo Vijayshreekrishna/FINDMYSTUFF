@@ -41,14 +41,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         // If approved, maybe open link sharing?
         if (status === 'approved') {
             await ChatThread.findOneAndUpdate(
-                { claim: id },
+                { claim: new Types.ObjectId(id) as any },
                 { allowLinks: true }
             );
         }
 
         if (status === 'rejected') {
             await ChatThread.findOneAndUpdate(
-                { claim: id },
+                { claim: new Types.ObjectId(id) as any },
                 { isClosed: true }
             );
         }
