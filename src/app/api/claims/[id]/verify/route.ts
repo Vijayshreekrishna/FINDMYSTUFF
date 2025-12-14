@@ -48,13 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         if (decision === 'approved') {
             claim.status = 'approved';
-
-            // Close the chat thread
-            const thread = await ChatThread.findOne({ claim: claim._id });
-            if (thread) {
-                thread.isClosed = true;
-                await thread.save();
-            }
+            // Chat remains open per user request
         } else {
             claim.status = 'rejected';
         }

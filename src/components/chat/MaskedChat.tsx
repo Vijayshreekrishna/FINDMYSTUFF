@@ -36,16 +36,19 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const [thread, setThread] = useState<Thread | null>(null);
     const [newMessage, setNewMessage] = useState("");
     const [handoffCode, setHandoffCode] = useState("");
+    const [notification, setNotification] = useState<{ message: string, type: 'success' | 'info' } | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
+
+    const refreshThread = async () => {
+        const res = await fetch(`/api/threads/${threadId}`);
+        const data = await res.json();
+        setMessages(data.messages);
+        setThread(data.thread);
+    };
 
     // Initial load
     useEffect(() => {
-        fetch(`/api/threads/${threadId}`)
-            .then(res => res.json())
-            .then(data => {
-                setMessages(data.messages);
-                setThread(data.thread);
-            });
+        refreshThread();
     }, [threadId]);
 
     // SSE Stream
@@ -73,6 +76,14 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Clear notification after 3s
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
 
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
@@ -106,8 +117,8 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
         });
         const data = await res.json();
         if (data.success) {
-            alert("Handoff confirmed! Interaction complete.");
-            window.location.reload();
+            setNotification({ message: "Handoff confirmed! Interaction complete.", type: 'success' });
+            setTimeout(() => window.location.reload(), 1500);
         } else {
             alert(data.error || "Invalid code");
         }
@@ -120,7 +131,17 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const isFinder = thread.finder === currentUserId;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] relative">
+            {/* Notification Popup */}
+            {notification && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4">
+                    <div className={`px-4 py-2 rounded-full shadow-lg text-sm font-medium ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
+                        }`}>
+                        {notification.message}
+                    </div>
+                </div>
+            )}
+
             {/* Main Chat Area */}
             <div className="md:col-span-2 flex flex-col bg-zinc-50 dark:bg-zinc-900 rounded-2xl border dark:border-zinc-700 overflow-hidden shadow-sm">
                 {/* Header */}
@@ -167,7 +188,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                             onKeyDown={e => e.key === 'Enter' && sendMessage()}
                             placeholder={thread.isClosed ? "Thread is closed" : "Type a message..."}
                             disabled={thread.isClosed}
-                            className="flex-1 px-4 py-2 border rounded-xl bg-gray-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            className="flex-1 px-4 py-2 border rounded-xl bg-gray-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-gray-100 caret-blue-500 dark:caret-white"
                         />
                         <button
                             onClick={sendMessage}
@@ -184,13 +205,23 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
             <div className="flex flex-col gap-4 overflow-y-auto">
                 {/* 1. Verification Logic */}
                 {!isFinder && (thread.claim.status === 'pending' || thread.claim.status === 'awaiting_verification') && (
-                    <ProofUploadPanel claimId={thread.claim._id} />
+                    <ProofUploadPanel
+                        claimId={thread.claim._id}
+                        onSuccess={() => {
+                            refreshThread();
+                            setNotification({ message: "Proof submitted successfully!", type: 'success' });
+                        }}
+                    />
                 )}
 
                 {isFinder && thread.claim.status === 'awaiting_verification' && thread.claim.claimerProof && (
                     <ReviewPanel
                         claimId={thread.claim._id}
                         proof={thread.claim.claimerProof}
+                        onDecision={() => {
+                            refreshThread();
+                            setNotification({ message: "Decision recorded.", type: 'info' });
+                        }}
                     />
                 )}
 

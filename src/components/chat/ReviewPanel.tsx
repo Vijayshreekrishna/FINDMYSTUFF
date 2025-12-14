@@ -1,96 +1,84 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Check, X, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 
 interface ReviewPanelProps {
     claimId: string;
-    proof: {
-        imageUrl?: string;
-        note?: string;
-        submittedAt?: Date;
-    };
-    onDecision?: (decision: 'approved' | 'rejected') => void;
+    proof: NonNullable<any>['claimerProof'];
+    onDecision?: () => void;
 }
 
 export default function ReviewPanel({ claimId, proof, onDecision }: ReviewPanelProps) {
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState("");
+    const [status, setStatus] = useState<'idle' | 'submitting'>('idle');
     const router = useRouter();
 
     const handleDecision = async (decision: 'approved' | 'rejected') => {
-        if (!confirm(`Are you sure you want to ${decision} this claim? This cannot be undone.`)) return;
-
-        setProcessing(true);
-        setError("");
-
+        setStatus('submitting');
         try {
             const res = await fetch(`/api/claims/${claimId}/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ decision }),
+                body: JSON.stringify({ decision, reason: `Manually ${decision} by finder.` }),
             });
 
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to verify claim");
-            }
+            if (!res.ok) throw new Error("Failed");
 
-            if (onDecision) onDecision(decision);
+            if (onDecision) onDecision();
             router.refresh();
-        } catch (e: any) {
-            setError(e.message);
-            setProcessing(false);
+        } catch (e) {
+            alert("Action failed. Try again.");
+        } finally {
+            setStatus('idle');
         }
     };
 
     return (
-        <div className="p-4 border border-yellow-200 rounded-2xl bg-yellow-50/50">
-            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <AlertCircle size={18} className="text-yellow-600" />
-                Review Proof
+        <div className="p-4 border border-zinc-200 dark:border-zinc-700 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2 text-sm">
+                <ShieldCheck size={16} className="text-blue-600" />
+                Review Claimant Proof
             </h3>
 
-            <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm mb-4">
-                {proof.imageUrl ? (
-                    <img
-                        src={proof.imageUrl}
-                        alt="Proof"
-                        className="w-full h-48 object-cover rounded-lg mb-2 bg-gray-100"
-                    />
-                ) : (
-                    <div className="text-sm text-gray-400 italic text-center py-4 bg-gray-50 rounded-lg">No image provided</div>
-                )}
-
-                {proof.note && (
-                    <div className="text-sm text-gray-700 bg-gray-50 p-2 rounded-lg mt-2">
-                        <span className="font-semibold text-xs text-gray-500 uppercase block mb-1">Note</span>
-                        {proof.note}
+            <div className="bg-gray-50 dark:bg-zinc-900 rounded-xl p-3 mb-4 border border-gray-100 dark:border-zinc-700">
+                {proof.imageUrl && (
+                    <div className="mb-2 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700 bg-white dark:bg-black">
+                        <img
+                            src={proof.imageUrl}
+                            alt="Proof"
+                            className="w-full h-32 object-cover"
+                        />
                     </div>
                 )}
-
-                <div className="text-xs text-gray-400 mt-2 text-right">
-                    Submitted: {proof.submittedAt ? new Date(proof.submittedAt).toLocaleDateString() : 'N/A'}
+                <div className="text-xs space-y-1">
+                    <p className="text-gray-900 dark:text-gray-100 font-medium">
+                        {proof.note || "No note provided."}
+                    </p>
+                    <div className="text-gray-500 dark:text-gray-400 flex justify-between">
+                        <span>Submitted</span>
+                        <span>{proof.submittedAt ? format(new Date(proof.submittedAt), 'PP p') : ''}</span>
+                    </div>
                 </div>
             </div>
 
-            {error && <div className="text-red-600 text-xs mb-3">{error}</div>}
-
-            <div className="grid grid-cols-2 gap-3">
-                <button
-                    onClick={() => handleDecision('rejected')}
-                    disabled={processing}
-                    className="py-2 px-3 border border-red-200 text-red-700 bg-red-50 hover:bg-red-100 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                    <XCircle size={16} /> Reject
-                </button>
+            <div className="flex gap-3">
                 <button
                     onClick={() => handleDecision('approved')}
-                    disabled={processing}
-                    className="py-2 px-3 bg-green-600 text-white hover:bg-green-700 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
+                    disabled={status === 'submitting'}
+                    className="flex-1 py-2 bg-green-600 text-white rounded-xl font-medium text-sm hover:bg-green-700 disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
                 >
-                    <CheckCircle size={16} /> Approve
+                    <Check size={16} />
+                    {status === 'submitting' ? "Approving..." : "Approve"}
+                </button>
+                <button
+                    onClick={() => handleDecision('rejected')}
+                    disabled={status === 'submitting'}
+                    className="flex-1 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl font-medium text-sm hover:bg-red-100 disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
+                >
+                    <X size={16} />
+                    {status === 'submitting' ? "Rejecting..." : "Reject"}
                 </button>
             </div>
         </div>
