@@ -9,7 +9,7 @@ import { calculateClaimScore, getClaimBand } from "@/lib/claimScore";
 import { generateMaskedHandle } from "@/lib/maskedHandle";
 import { claimRateLimit } from "@/lib/ratelimit";
 import { z } from "zod";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
 
 
 const createClaimSchema = z.object({
@@ -90,8 +90,8 @@ export async function POST(req: NextRequest) {
         const fingerprint = `${ip}-${userAgent}`; // Simple string or hash
 
         const claim = await Claim.create({
-            post: postId,
-            claimant: userId,
+            post: new Types.ObjectId(postId),
+            claimant: new Types.ObjectId(userId),
             score,
             answers,
             evidenceImage,

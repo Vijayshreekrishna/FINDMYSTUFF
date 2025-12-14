@@ -1,8 +1,8 @@
-import { Schema, model, models, type Document, type Model } from 'mongoose';
+import { Schema, model, models, type Document, type Model, Types } from 'mongoose';
 
 export interface IClaim extends Document {
-    post: Schema.Types.ObjectId;
-    claimant: Schema.Types.ObjectId;
+    post: Types.ObjectId;
+    claimant: Types.ObjectId;
     status: 'pending' | 'approved' | 'rejected' | 'expired';
     verificationStatus: 'unverified' | 'email_verified' | 'fully_verified';
     score: number;
