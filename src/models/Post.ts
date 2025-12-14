@@ -17,6 +17,13 @@ const PostSchema = new Schema({
         default: 'reported',
     },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    sensitiveAreas: [{
+        x: Number,
+        y: Number,
+        w: Number,
+        h: Number
+    }],
+    sensitiveHidden: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

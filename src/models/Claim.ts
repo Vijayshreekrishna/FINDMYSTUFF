@@ -8,7 +8,9 @@ export interface IClaim extends Document {
     score: number;
     answers: Record<string, any>;
     evidenceImage?: string;
+    evidenceImage?: string;
     handoffCodeHash?: string;
+    fingerprint?: string;
     expiresAt: Date;
     createdAt: Date;
     updatedAt: Date;
@@ -32,6 +34,7 @@ const ClaimSchema = new Schema<IClaim>(
         answers: { type: Map, of: Schema.Types.Mixed, default: {} },
         evidenceImage: { type: String },
         handoffCodeHash: { type: String },
+        fingerprint: { type: String },
         expiresAt: { type: Date, required: true },
     },
     { timestamps: true }

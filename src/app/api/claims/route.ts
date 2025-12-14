@@ -77,12 +77,16 @@ export async function POST(req: NextRequest) {
         // const band = getClaimBand(score);
 
         // Create Claim
+        const userAgent = req.headers.get("user-agent") || "";
+        const fingerprint = `${ip}-${userAgent}`; // Simple string or hash
+
         const claim = await Claim.create({
             post: postId,
             claimant: userId,
             score,
             answers,
             evidenceImage,
+            fingerprint,
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
         });
 
