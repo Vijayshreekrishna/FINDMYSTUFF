@@ -48,7 +48,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
                     // Check for messages created after lastCheck
                     const newMessages = await Message.find()
                         .where("thread").equals(id)
-                        .where("createdAt").gt(lastCheck)
+                        .where("createdAt").gt(lastCheck as any)
                         .sort({ createdAt: 1 });
 
                     if (newMessages.length > 0) {

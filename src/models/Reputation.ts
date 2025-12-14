@@ -1,7 +1,7 @@
-import { Schema, model, models, type Document, type Model } from 'mongoose';
+import { Schema, model, models, type Document, type Model, Types } from 'mongoose';
 
 export interface IReputation extends Document {
-    user: Schema.Types.ObjectId;
+    user: Types.ObjectId;
     score: number;
     successfulHandoffs: number;
     rejectedClaims: number;

@@ -110,6 +110,9 @@ export async function POST(req: NextRequest) {
             finder: finderId,
             claimant: userId,
             maskedHandleMap,
+            allowLinks: false,
+            allowAttachments: false,
+            autoCloseAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
         });
 
         return NextResponse.json({ claim, threadId: thread._id }, { status: 201 });

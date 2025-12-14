@@ -6,6 +6,7 @@ import ChatThread from "@/models/ChatThread";
 import Message from "@/models/Message";
 import { ratelimit } from "@/lib/ratelimit";
 import { stripLinks } from "@/lib/sanitize";
+import { Types } from "mongoose";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -52,9 +53,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             finalContent = stripLinks(content);
         }
 
+        // ... existing imports
+
         const message = await Message.create({
-            thread: id,
-            sender: userId,
+            thread: new Types.ObjectId(id),
+            sender: new Types.ObjectId(userId),
             content: finalContent,
         });
 
