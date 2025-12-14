@@ -9,6 +9,7 @@ import { calculateClaimScore, getClaimBand } from "@/lib/claimScore";
 import { generateMaskedHandle } from "@/lib/maskedHandle";
 import { claimRateLimit } from "@/lib/ratelimit";
 import { z } from "zod";
+import mongoose, { Types, isValidObjectId } from "mongoose";
 
 const createClaimSchema = z.object({
     postId: z.string(),
@@ -46,6 +47,11 @@ export async function POST(req: NextRequest) {
         // @ts-ignore
         const userId = session.user.id;
 
+        // Validate IDs
+        if (!isValidObjectId(postId) || !isValidObjectId(userId)) {
+            return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
+        }
+
         await dbConnect();
 
         // Check if post exists
@@ -60,7 +66,10 @@ export async function POST(req: NextRequest) {
         }
 
         // Check for duplicate claim
-        const existingClaim = await Claim.findOne({ post: postId, claimant: userId });
+        const existingClaim = await Claim.findOne({
+            post: new Types.ObjectId(postId),
+            claimant: new Types.ObjectId(userId)
+        });
         if (existingClaim) {
             return NextResponse.json({ error: "You have already claimed this item" }, { status: 409 });
         }
