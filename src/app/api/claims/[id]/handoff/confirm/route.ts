@@ -53,14 +53,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         // Let's accept 'approved' or update Post status to 'claimed' or 'resolved'
 
         // Update Post
-        await Post.findByIdAndUpdate(claim.post._id, { status: 'resolved' });
+        await Post.findByIdAndUpdate((claim.post as any)._id, { status: 'resolved' });
 
         // Update Reputation (Finder + Claimant)
         // Finder gets karma
         // @ts-ignore
         await Reputation.findOneAndUpdate(
             // @ts-ignore
-            { user: claim.post.user },
+            { user: (claim.post as any).user },
             { $inc: { score: 20, successfulHandoffs: 1 } },
             { upsert: true }
         );
