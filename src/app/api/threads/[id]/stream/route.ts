@@ -4,7 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/lib/db";
 import ChatThread from "@/models/ChatThread";
 import Message from "@/models/Message";
-import { Types } from "mongoose";
+import { castObjectId } from "@/lib/castObjectId";
 
 // Simple polling interval for SSE simulation
 const POLL_INTERVAL_MS = 1000;
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
                 try {
                     // Check for messages created after lastCheck
                     const newMessages = await Message.find({
-                        thread: new Types.ObjectId(id) as any,
+                        thread: castObjectId(id),
                         createdAt: { $gt: lastCheck }
                     }).sort({ createdAt: 1 });
 

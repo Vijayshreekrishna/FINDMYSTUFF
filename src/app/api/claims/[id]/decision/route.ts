@@ -5,7 +5,7 @@ import dbConnect from "@/lib/db";
 import Claim from "@/models/Claim";
 import ChatThread from "@/models/ChatThread";
 import Post from "@/models/Post";
-import { Types } from "mongoose";
+import { castObjectId } from "@/lib/castObjectId";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -42,14 +42,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         // If approved, maybe open link sharing?
         if (status === 'approved') {
             await ChatThread.findOneAndUpdate(
-                { claim: new Types.ObjectId(id) as any },
+                { claim: castObjectId(id) },
                 { allowLinks: true }
             );
         }
 
         if (status === 'rejected') {
             await ChatThread.findOneAndUpdate(
-                { claim: new Types.ObjectId(id) as any },
+                { claim: castObjectId(id) },
                 { isClosed: true }
             );
         }
