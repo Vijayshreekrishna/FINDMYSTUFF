@@ -14,13 +14,19 @@ export default function UnifiedClaimsPage() {
         // Fetch Output Claims (My Requests)
         fetch("/api/claims/my")
             .then(r => r.ok ? r.json() : Promise.reject(r))
-            .then(setMyClaims)
+            .then(data => {
+                console.log("My Claims:", data);
+                setMyClaims(data);
+            })
             .catch(console.error);
 
         // Fetch Incoming Claims (Received Requests)
         fetch("/api/claims/received")
             .then(r => r.ok ? r.json() : Promise.reject(r))
-            .then(setReceivedClaims)
+            .then(data => {
+                console.log("Received Claims:", data);
+                setReceivedClaims(data);
+            })
             .catch(console.error);
     }, []);
 
@@ -85,7 +91,7 @@ export default function UnifiedClaimsPage() {
                                         </div>
                                     </div>
                                     {c.chatThread ? (
-                                        <Link href={`/threads/${c.chatThread}`} className="flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-green-50 text-green-700 font-medium rounded-xl hover:bg-green-100 transition-colors w-full">
+                                        <Link href={`/messages/${c.chatThread}`} className="flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-green-50 text-green-700 font-medium rounded-xl hover:bg-green-100 transition-colors w-full">
                                             <LinkIcon size={16} /> Open masked chat
                                         </Link>
                                     ) : (
@@ -126,7 +132,7 @@ export default function UnifiedClaimsPage() {
                                         </div>
                                         <div className="flex items-center gap-3 w-full md:w-auto">
                                             {c.chatThread ? (
-                                                <Link href={`/threads/${c.chatThread}`} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                                                <Link href={`/messages/${c.chatThread}`} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
                                                     <MessageSquare size={16} /> Chat & Verify
                                                 </Link>
                                             ) : (

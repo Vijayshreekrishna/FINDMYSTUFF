@@ -1,35 +1,40 @@
-"use client";
-
-import { use, useEffect, useState } from "react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import MaskedChat from "@/components/chat/MaskedChat";
-import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-export default function MessagePage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
-    const { data: session } = useSession();
-    const [threadId, setThreadId] = useState<string | null>(null);
-
-    // We need to fetch the Thread ID associated with this Claim ID
-    // OR we can just assume `GET /api/claims/:id` returns threadId?
-    // Let's assume we can fetch claim details and get thread info.
-
-    useEffect(() => {
-        // Warning: MaskedChat takes a threadId, but here `id` is claimId? 
-        // The previous Link in dashboard was `/messages/${claim._id}`.
-        // We need to resolve claim -> thread.
-        // Let's add that to GET /api/claims/:id/thread or similar.
-        // Or better, let's just make the Page accept threadId if we link to `/messages/thread/[id]`.
-        // But dashboard has `claim._id` readily available.
-        // Let's fetch thread by claim.
-        fetch(`/api/claims/${id}/thread`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.threadId) setThreadId(data.threadId);
-            });
-    }, [id]);
-
-    if (!session || !threadId) return <div>Loading...</div>;
-
+export default async function MessagePage({ params }: { params: Promise<{ id: string }> }) {
+    const session = await getServerSession(authOptions);
     // @ts-ignore
-    return <MaskedChat threadId={threadId} currentUserId={session.user.id} />;
+    const userId = session?.user?.id;
+    const { id } = await params;
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 p-4 sm:p-6">
+            <div className="max-w-4xl mx-auto space-y-4">
+                {/* Header */}
+                <div className="flex items-center gap-4 mb-6">
+                    <Link
+                        href="/profile/claims"
+                        className="p-2 bg-white dark:bg-zinc-900 rounded-full border dark:border-zinc-800 shadow-sm hover:shadow transition-all text-gray-600 dark:text-gray-300"
+                    >
+                        <ArrowLeft size={20} />
+                    </Link>
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Secure Chat</h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Anonymous communication channel</p>
+                    </div>
+                </div>
+
+                {/* Chat Component */}
+                <MaskedChat threadId={id} currentUserId={userId} />
+            </div>
+        </div>
+    );
 }
