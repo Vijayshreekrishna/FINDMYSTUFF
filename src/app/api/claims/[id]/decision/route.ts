@@ -5,7 +5,7 @@ import dbConnect from "@/lib/db";
 import Claim from "@/models/Claim";
 import ChatThread from "@/models/ChatThread";
 import Post from "@/models/Post";
-import { castObjectId } from "@/lib/castObjectId";
+import Post from "@/models/Post";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -41,17 +41,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         // If approved, maybe open link sharing?
         if (status === 'approved') {
-            await ChatThread.findOneAndUpdate(
-                { claim: castObjectId(id) },
-                { allowLinks: true }
-            );
+            await ChatThread.findOneAndUpdate()
+                .where("claim").equals(id)
+                .set({ allowLinks: true });
         }
 
         if (status === 'rejected') {
-            await ChatThread.findOneAndUpdate(
-                { claim: castObjectId(id) },
-                { isClosed: true }
-            );
+            await ChatThread.findOneAndUpdate()
+                .where("claim").equals(id)
+                .set({ isClosed: true });
         }
 
         return NextResponse.json({ success: true, claim });
