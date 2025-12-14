@@ -102,8 +102,8 @@ export async function POST(req: NextRequest) {
         // Create Chat Thread
         const finderId = post.user.toString();
         const maskedHandleMap = new Map();
-        maskedHandleMap.set(userId, generateMaskedHandle(userId)); // Claimant
-        maskedHandleMap.set(finderId, generateMaskedHandle(finderId)); // Finder
+        maskedHandleMap.set(userId, generateMaskedHandle()); // Claimant
+        maskedHandleMap.set(finderId, generateMaskedHandle()); // Finder
 
         const thread = await ChatThread.create({
             claim: claim._id,

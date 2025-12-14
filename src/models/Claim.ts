@@ -3,13 +3,27 @@ import { Schema, model, models, type Document, type Model, Types } from 'mongoos
 export interface IClaim extends Document {
     post: Types.ObjectId;
     claimant: Types.ObjectId;
-    status: 'pending' | 'approved' | 'rejected' | 'expired';
+    status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired';
     verificationStatus: 'unverified' | 'email_verified' | 'fully_verified';
     score: number;
     answers: Record<string, any>;
     evidenceImage?: string;
     handoffCodeHash?: string;
     fingerprint?: string;
+
+    // Stage 3: Verification
+    claimerProof?: {
+        imageUrl: string;
+        note?: string;
+        submittedAt?: Date;
+    };
+    verification?: {
+        reviewedBy?: Types.ObjectId;
+        decision?: 'approved' | 'rejected';
+        decidedAt?: Date;
+        reason?: string;
+    };
+
     expiresAt: Date;
     createdAt: Date;
     updatedAt: Date;
@@ -21,7 +35,7 @@ const ClaimSchema = new Schema<IClaim>(
         claimant: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         status: {
             type: String,
-            enum: ['pending', 'approved', 'rejected', 'expired'],
+            enum: ['pending', 'awaiting_verification', 'approved', 'rejected', 'expired'],
             default: 'pending',
         },
         verificationStatus: {
@@ -34,6 +48,19 @@ const ClaimSchema = new Schema<IClaim>(
         evidenceImage: { type: String },
         handoffCodeHash: { type: String },
         fingerprint: { type: String },
+
+        claimerProof: {
+            imageUrl: { type: String },
+            note: { type: String },
+            submittedAt: { type: Date }
+        },
+        verification: {
+            reviewedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+            decision: { type: String, enum: ['approved', 'rejected'] },
+            decidedAt: { type: Date },
+            reason: { type: String }
+        },
+
         expiresAt: { type: Date, required: true },
     },
     { timestamps: true }

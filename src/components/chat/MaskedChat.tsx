@@ -1,8 +1,9 @@
-"use client";
-
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { Send, Lock, RotateCcw } from "lucide-react";
+import ProofUploadPanel from "./ProofUploadPanel";
+import ReviewPanel from "./ReviewPanel";
+import StatusBadge from "./StatusBadge";
 
 interface Message {
     _id: string;
@@ -17,7 +18,15 @@ interface Thread {
     allowLinks: boolean;
     isClosed: boolean;
     finder: string;
-    claim: { _id: string } | string;
+    claim: {
+        _id: string;
+        status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired';
+        claimerProof?: {
+            imageUrl: string;
+            note?: string;
+            submittedAt: Date;
+        };
+    };
 }
 
 export default function MaskedChat({ threadId, currentUserId }: { threadId: string, currentUserId: string }) {
@@ -77,7 +86,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
 
     const handleHandoffGenerate = async () => {
         if (!thread) return;
-        const claimId = typeof thread.claim === 'string' ? thread.claim : thread.claim._id;
+        const claimId = thread.claim._id;
         const res = await fetch(`/api/claims/${claimId}/handoff`, { method: 'POST' });
         const data = await res.json();
         if (data.code) {
@@ -88,7 +97,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const handleHandoffConfirm = async () => {
         if (!thread) return;
         if (!handoffCode) return;
-        const claimId = typeof thread.claim === 'string' ? thread.claim : thread.claim._id;
+        const claimId = thread.claim._id;
         const res = await fetch(`/api/claims/${claimId}/handoff/confirm`, {
             method: 'POST',
             body: JSON.stringify({ code: handoffCode })
@@ -102,91 +111,122 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
         }
     };
 
-    if (!thread) return <div>Loading chat...</div>;
+    if (!thread) return <div className="p-8 text-center text-gray-500">Loading chat...</div>;
 
     const myHandle = thread.maskedHandleMap[currentUserId] || "Me";
     const otherHandle = Object.values(thread.maskedHandleMap).find(h => h !== myHandle) || "User";
     const isFinder = thread.finder === currentUserId;
 
     return (
-        <div className="flex flex-col h-[500px] bg-zinc-50 dark:bg-zinc-900 rounded-lg border dark:border-zinc-700">
-            {/* Header */}
-            <div className="p-4 border-b dark:border-zinc-700 flex justify-between items-center bg-white dark:bg-zinc-800 rounded-t-lg">
-                <div>
-                    <h3 className="font-bold">Chat with {otherHandle}</h3>
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                        <Lock size={12} />
-                        <span>End-to-end masked • Links {thread.allowLinks ? 'Allowed' : 'Blocked'}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
+            {/* Main Chat Area */}
+            <div className="md:col-span-2 flex flex-col bg-zinc-50 dark:bg-zinc-900 rounded-2xl border dark:border-zinc-700 overflow-hidden shadow-sm">
+                {/* Header */}
+                <div className="p-4 border-b dark:border-zinc-700 flex justify-between items-center bg-white dark:bg-zinc-800">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100">Chat with {otherHandle}</h3>
+                            <StatusBadge status={thread.claim.status} />
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-zinc-500 mt-1">
+                            <Lock size={12} />
+                            <span>End-to-end masked • Links {thread.allowLinks ? 'Allowed' : 'Blocked'}</span>
+                        </div>
                     </div>
                 </div>
-                {/* Handoff Actions */}
-                <div className="flex gap-2">
-                    {isFinder ? (
-                        <button
-                            onClick={handleHandoffGenerate}
-                            className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
-                        >
-                            Generate Code
-                        </button>
-                    ) : (
-                        <div className="flex gap-1">
-                            <input
-                                value={handoffCode}
-                                onChange={e => setHandoffCode(e.target.value)}
-                                placeholder="6-digit code"
-                                className="w-24 text-sm px-2 border rounded"
-                            />
-                            <button
-                                onClick={handleHandoffConfirm}
-                                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                            >
-                                Confirm
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map(msg => {
-                    const isMe = msg.sender === currentUserId;
-                    return (
-                        <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[70%] p-3 rounded-lg ${isMe
-                                ? 'bg-blue-600 text-white rounded-br-none'
-                                : 'bg-gray-200 dark:bg-zinc-700 text-zinc-900 dark:text-gray-100 rounded-bl-none'
-                                }`}>
-                                <p>{msg.content}</p>
-                                <span className="text-[10px] opacity-70 mt-1 block">
-                                    {format(new Date(msg.createdAt), 'h:mm a')}
-                                </span>
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messages.map(msg => {
+                        const isMe = msg.sender === currentUserId;
+                        return (
+                            <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[75%] p-3 rounded-2xl px-4 ${isMe
+                                    ? 'bg-blue-600 text-white rounded-br-sm'
+                                    : 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-bl-sm shadow-sm'
+                                    }`}>
+                                    <p className="text-sm">{msg.content}</p>
+                                    <span className="text-[10px] opacity-70 mt-1 block text-right">
+                                        {format(new Date(msg.createdAt), 'h:mm a')}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
-                <div ref={bottomRef} />
+                        );
+                    })}
+                    <div ref={bottomRef} />
+                </div>
+
+                {/* Input */}
+                <div className="p-4 bg-white dark:bg-zinc-800 border-t dark:border-zinc-700">
+                    <div className="flex gap-2">
+                        <input
+                            value={newMessage}
+                            onChange={e => setNewMessage(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && sendMessage()}
+                            placeholder={thread.isClosed ? "Thread is closed" : "Type a message..."}
+                            disabled={thread.isClosed}
+                            className="flex-1 px-4 py-2 border rounded-xl bg-gray-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        />
+                        <button
+                            onClick={sendMessage}
+                            disabled={thread.isClosed || !newMessage.trim()}
+                            className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        >
+                            <Send size={18} />
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {/* Input */}
-            <div className="p-4 bg-white dark:bg-zinc-800 border-t dark:border-zinc-700 rounded-b-lg">
-                <div className="flex gap-2">
-                    <input
-                        value={newMessage}
-                        onChange={e => setNewMessage(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                        placeholder={thread.isClosed ? "Thread is closed" : "Type a message..."}
-                        disabled={thread.isClosed}
-                        className="flex-1 p-2 border rounded dark:bg-zinc-900"
+            {/* Side Panel (Verification & Action) */}
+            <div className="flex flex-col gap-4 overflow-y-auto">
+                {/* 1. Verification Logic */}
+                {!isFinder && (thread.claim.status === 'pending' || thread.claim.status === 'awaiting_verification') && (
+                    <ProofUploadPanel claimId={thread.claim._id} />
+                )}
+
+                {isFinder && thread.claim.status === 'awaiting_verification' && thread.claim.claimerProof && (
+                    <ReviewPanel
+                        claimId={thread.claim._id}
+                        proof={thread.claim.claimerProof}
                     />
-                    <button
-                        onClick={sendMessage}
-                        disabled={thread.isClosed || !newMessage.trim()}
-                        className="bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-                    >
-                        <Send size={18} />
-                    </button>
-                </div>
+                )}
+
+                {/* 2. Handoff Logic (Only show if approved) */}
+                {thread.claim.status === 'approved' && (
+                    <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-700 shadow-sm">
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Meetup & Handoff</h4>
+                        {isFinder ? (
+                            <div className="space-y-2">
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Generate a secure code when you meet the claimant.</p>
+                                <button
+                                    onClick={handleHandoffGenerate}
+                                    className="w-full bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition-colors"
+                                >
+                                    Generate Handoff Code
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Enter the code provided by the finder to confirm receipt.</p>
+                                <div className="flex gap-2">
+                                    <input
+                                        value={handoffCode}
+                                        onChange={e => setHandoffCode(e.target.value)}
+                                        placeholder="6-digit code"
+                                        className="flex-1 text-sm px-3 py-2 border rounded-xl"
+                                    />
+                                    <button
+                                        onClick={handleHandoffConfirm}
+                                        className="bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-bold hover:bg-green-700"
+                                    >
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
