@@ -9,8 +9,8 @@ import { calculateClaimScore, getClaimBand } from "@/lib/claimScore";
 import { generateMaskedHandle } from "@/lib/maskedHandle";
 import { claimRateLimit } from "@/lib/ratelimit";
 import { z } from "zod";
-import mongoose, { isValidObjectId } from "mongoose";
-import { castObjectId } from "@/lib/castObjectId";
+import { isValidObjectId } from "mongoose";
+
 
 const createClaimSchema = z.object({
     postId: z.string(),
@@ -67,10 +67,9 @@ export async function POST(req: NextRequest) {
         }
 
         // Check for duplicate claim
-        const existingClaim = await Claim.findOne({
-            post: castObjectId(postId),
-            claimant: castObjectId(userId)
-        });
+        const existingClaim = await Claim.findOne()
+            .where("post").equals(postId)
+            .where("claimant").equals(userId);
         if (existingClaim) {
             return NextResponse.json({ error: "You have already claimed this item" }, { status: 409 });
         }
