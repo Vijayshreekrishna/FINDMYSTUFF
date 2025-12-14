@@ -17,6 +17,7 @@ interface Thread {
     allowLinks: boolean;
     isClosed: boolean;
     finder: string;
+    claim: { _id: string } | string;
 }
 
 export default function MaskedChat({ threadId, currentUserId }: { threadId: string, currentUserId: string }) {
@@ -76,7 +77,8 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
 
     const handleHandoffGenerate = async () => {
         if (!thread) return;
-        const res = await fetch(`/api/claims/${thread.claim}/handoff`, { method: 'POST' });
+        const claimId = typeof thread.claim === 'string' ? thread.claim : thread.claim._id;
+        const res = await fetch(`/api/claims/${claimId}/handoff`, { method: 'POST' });
         const data = await res.json();
         if (data.code) {
             alert(`Your Handoff Code is: ${data.code}\nShare this with the claimant ONLY when meeting.`);
@@ -86,7 +88,8 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const handleHandoffConfirm = async () => {
         if (!thread) return;
         if (!handoffCode) return;
-        const res = await fetch(`/api/claims/${thread.claim}/handoff/confirm`, {
+        const claimId = typeof thread.claim === 'string' ? thread.claim : thread.claim._id;
+        const res = await fetch(`/api/claims/${claimId}/handoff/confirm`, {
             method: 'POST',
             body: JSON.stringify({ code: handoffCode })
         });
@@ -151,8 +154,8 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                     return (
                         <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[70%] p-3 rounded-lg ${isMe
-                                    ? 'bg-blue-600 text-white rounded-br-none'
-                                    : 'bg-gray-200 dark:bg-zinc-700 text-zinc-900 dark:text-gray-100 rounded-bl-none'
+                                ? 'bg-blue-600 text-white rounded-br-none'
+                                : 'bg-gray-200 dark:bg-zinc-700 text-zinc-900 dark:text-gray-100 rounded-bl-none'
                                 }`}>
                                 <p>{msg.content}</p>
                                 <span className="text-[10px] opacity-70 mt-1 block">
