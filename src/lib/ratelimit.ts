@@ -25,7 +25,7 @@ export const ratelimit = redis ? new Ratelimit({
 
 export const claimRateLimit = redis ? new Ratelimit({
     redis: redis,
-    limiter: Ratelimit.slidingWindow(5, "1 d"), // 5 claims per day
+    limiter: Ratelimit.slidingWindow(50, "1 d"), // Increased to 50 claims per day for testing
     analytics: true,
     prefix: "ratelimit:claims",
 }) : dummyLimiter;
