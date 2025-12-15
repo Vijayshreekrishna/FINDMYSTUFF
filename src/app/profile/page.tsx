@@ -31,7 +31,7 @@ export default async function ProfilePage() {
     const posts = await getUserPosts(userId);
 
     return (
-        <main className="min-h-screen bg-gray-50 py-8">
+        <main className="min-h-screen bg-gray-50 dark:bg-zinc-950 py-8">
             {/* @ts-ignore */}
             <ProfileDashboard posts={posts} user={session.user} />
 
@@ -41,12 +41,12 @@ export default async function ProfilePage() {
                     {/* Unified Claim Management */}
                     <Link
                         href="/profile/claims"
-                        className="block rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50 transition shadow-sm"
+                        className="block rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 hover:bg-gray-50 dark:hover:bg-zinc-700 transition shadow-sm"
                     >
-                        <h3 className="font-semibold text-green-700 flex items-center gap-2">
+                        <h3 className="font-semibold text-lg text-green-700 dark:text-green-500 flex items-center gap-2">
                             🧾 Claim Management
                         </h3>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                             Track your lost items and manage requests for items you found.
                         </p>
                     </Link>

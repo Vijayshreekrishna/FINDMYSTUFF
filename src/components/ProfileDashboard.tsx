@@ -1,14 +1,18 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Bell, Send } from "lucide-react";
+import { Bell, Send, Package } from "lucide-react";
 import { Section } from "@/components/Wrappers";
 import PostCard from "@/components/post-card";
+import { format } from "date-fns";
+import { NewtonsCradle } from "@/components/ui/NewtonsCradle";
 
 const EmptyState = ({ title, action }: { title: string; action?: string }) => (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 p-6 text-center text-gray-500">
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 p-6 text-center text-gray-500 dark:text-gray-400">
         <Send className="mb-2" size={18} />
         <div className="text-sm">{title}</div>
-        {action && <Link href="/search" className="mt-2 text-sm text-blue-600 hover:underline">{action}</Link>}
+        {action && <Link href="/search" className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">{action}</Link>}
     </div>
 );
 
@@ -17,47 +21,146 @@ interface ProfileDashboardProps {
     user: any;
 }
 
-export const ProfileDashboard = ({ posts, user }: ProfileDashboardProps) => (
-    <Section
-        title={`Hello, ${user?.name?.split(" ")[0] || "User"}`}
-        subtitle="Manage your reports and account."
-        actions={<button className="rounded-xl border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 bg-white text-gray-700">Edit Profile</button>}
-    >
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="space-y-4 lg:col-span-2">
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <div className="mb-3 flex items-center justify-between">
-                        <h4 className="text-sm font-semibold text-gray-900">My Reports</h4>
-                        <Link href="/report" className="text-sm text-blue-600 hover:underline">New report</Link>
-                    </div>
-                    {posts && posts.length > 0 ? (
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {posts.map((post) => (
-                                <PostCard key={post._id} post={post} />
-                            ))}
+export const ProfileDashboard = ({ posts, user }: ProfileDashboardProps) => {
+    const [alertsEnabled, setAlertsEnabled] = useState(true); // Default to true
+    const [claims, setClaims] = useState<any[]>([]);
+    const [loadingClaims, setLoadingClaims] = useState(true);
+
+    useEffect(() => {
+        // Load alerts preference from localStorage (default to true)
+        const savedPreference = localStorage.getItem('alertsEnabled');
+        if (savedPreference !== null) {
+            setAlertsEnabled(savedPreference === 'true');
+        } else {
+            // Set default to true in localStorage
+            localStorage.setItem('alertsEnabled', 'true');
+        }
+
+        // Fetch claims (both incoming and my claims)
+        fetchClaims();
+    }, []);
+
+    const fetchClaims = async () => {
+        try {
+            const [receivedRes, myRes] = await Promise.all([
+                fetch('/api/claims/received'),
+                fetch('/api/claims/my')
+            ]);
+
+            const receivedData = await receivedRes.json();
+            const myData = await myRes.json();
+
+            // Combine and sort by date
+            const allClaims = [
+                ...(Array.isArray(receivedData) ? receivedData : []),
+                ...(Array.isArray(myData) ? myData : [])
+            ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+            setClaims(allClaims.slice(0, 5)); // Show only 5 most recent
+        } catch (error) {
+            console.error('Error fetching claims:', error);
+        } finally {
+            setLoadingClaims(false);
+        }
+    };
+
+    const toggleAlerts = () => {
+        const newValue = !alertsEnabled;
+        setAlertsEnabled(newValue);
+        localStorage.setItem('alertsEnabled', String(newValue));
+        // Dispatch custom event for same-tab synchronization
+        window.dispatchEvent(new Event('alertsToggled'));
+    };
+
+    return (
+        <Section
+            title={`Hello, ${user?.name?.split(" ")[0] || "User"}`}
+            subtitle="Manage your reports and account."
+            actions={<Link href="/profile/edit" className="rounded-xl border border-gray-300 dark:border-zinc-600 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 transition-colors">Edit Profile</Link>}
+        >
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="space-y-4 lg:col-span-2">
+                    <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                        <div className="mb-3 flex items-center justify-between">
+                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">My Reports</h4>
+                            <Link href="/report" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">New report</Link>
                         </div>
-                    ) : (
-                        <EmptyState title="You haven't reported any items yet." action="Report an item" />
-                    )}
+                        {posts && posts.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {posts.map((post) => (
+                                    <PostCard key={post._id} post={post} />
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyState title="You haven't reported any items yet." action="Report an item" />
+                        )}
+                    </div>
                 </div>
-                {/* <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <h4 className="mb-3 text-sm font-semibold text-gray-900">Matches</h4>
-                    <EmptyState title="No matches found yet" action="Check Search" />
-                </div> */}
+                <aside className="space-y-4">
+                    <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                        <h4 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Messages</h4>
+                        {loadingClaims ? (
+                            <div className="flex justify-center py-4">
+                                <NewtonsCradle size={40} color="#84cc16" />
+                            </div>
+                        ) : claims.length > 0 ? (
+                            <div className="space-y-2">
+                                {claims.map((claim: any) => (
+                                    <Link
+                                        key={claim._id}
+                                        href={`/profile/claims`}
+                                        className="block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors border border-gray-200 dark:border-zinc-600"
+                                    >
+                                        <div className="flex items-start gap-2">
+                                            <Package size={14} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                                                    {claim.post?.title || 'Item'}
+                                                </p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                                    {claim.status === 'pending' ? 'New claim' :
+                                                        claim.status === 'awaiting_verification' ? 'Needs review' :
+                                                            claim.status}
+                                                </p>
+                                                <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                                                    {format(new Date(claim.createdAt), 'MMM d')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                                <Link
+                                    href="/profile/claims"
+                                    className="block text-center text-xs text-blue-600 dark:text-blue-400 hover:underline mt-2"
+                                >
+                                    View all
+                                </Link>
+                            </div>
+                        ) : (
+                            <EmptyState title="No new messages" action="Go to Search" />
+                        )}
+                    </div>
+                    <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+                        <h4 className="mb-2 text-sm font-semibold text-gray-900 dark:text-white">Alerts</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Get notified when similar items are posted nearby.</p>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 dark:text-gray-200">Enable alerts</span>
+                            <button
+                                onClick={toggleAlerts}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800 ${alertsEnabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-zinc-600'
+                                    }`}
+                                role="switch"
+                                aria-checked={alertsEnabled}
+                            >
+                                <span
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${alertsEnabled ? 'translate-x-6' : 'translate-x-1'
+                                        }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
+                </aside>
             </div>
-            <aside className="space-y-4">
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-900">Messages</h4>
-                    <EmptyState title="No new messages" action="Go to Search" />
-                </div>
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-900">Alerts</h4>
-                    <p className="text-sm text-gray-600">Get notified when similar items are posted nearby.</p>
-                    <button className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 bg-white text-gray-700">
-                        <Bell size={16} />Enable alerts
-                    </button>
-                </div>
-            </aside>
-        </div>
-    </Section>
-);
+        </Section>
+    );
+};

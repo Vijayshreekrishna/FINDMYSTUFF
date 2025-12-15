@@ -5,6 +5,7 @@ import Providers from "@/components/Providers";
 import PWAEnforcer from "@/components/PWAEnforcer";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import PWAGuard from "@/components/PWAGuard";
+import { TopLoadingBar } from "@/components/ui/GlobalLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,10 +44,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F9FAFB] text-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F9FAFB] dark:bg-zinc-950 text-gray-900 dark:text-gray-100`}
         suppressHydrationWarning
       >
         <Providers>
+          <TopLoadingBar />
           <PWAEnforcer>
             <PWAGuard>
               <ConditionalLayout>

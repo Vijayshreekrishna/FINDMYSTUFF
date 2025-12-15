@@ -10,6 +10,7 @@ import { Plus, Search as SearchIcon, Layers, Search, CheckCircle, Loader2 } from
 import Link from "next/link";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { SearchBar } from "@/components/SearchBar";
+import { PageLoader } from "@/components/ui/NewtonsCradle";
 
 export default function FeedContent() {
     const searchParams = useSearchParams();
@@ -141,7 +142,7 @@ export default function FeedContent() {
             <div className="container mx-auto py-8 space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-black tracking-tight">Discover Items</h1>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Discover Items</h1>
                         {!loading && <p className="text-sm text-[var(--text-secondary)] mt-1">{posts.length} results found</p>}
                     </div>
                     <Link href="/report">
@@ -168,7 +169,7 @@ export default function FeedContent() {
                                 key={cat}
                                 onClick={() => handleCategoryChange(cat)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${category === cat
-                                    ? "bg-[var(--accent)] text-white shadow-md shadow-[var(--accent)]/25"
+                                    ? "bg-[var(--accent)] text-white dark:text-white shadow-md shadow-[var(--accent)]/25"
                                     : "bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-highlight)] border border-[var(--border)]"
                                     }`}
                             >
@@ -179,14 +180,9 @@ export default function FeedContent() {
                 </div>
             </div>
 
-            {/* Posts Grid */}
             <div className="container mx-auto px-4 pb-20 max-w-7xl">
                 {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                            <Skeleton key={i} className="h-80 w-full rounded-[var(--radius-lg)]" />
-                        ))}
-                    </div>
+                    <PageLoader message="Loading posts..." />
                 ) : posts.length > 0 ? (
                     <>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

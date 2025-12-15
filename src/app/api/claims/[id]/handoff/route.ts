@@ -24,6 +24,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         // @ts-ignore
         if (claim.post.user.toString() !== userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+        // Check if code already exists for this claim
+        if (claim.handoffCodeHash) {
+            return NextResponse.json({
+                error: "Code already generated for this claim. Each claim can only have one handoff code.",
+                alreadyGenerated: true
+            }, { status: 400 });
+        }
+
         const code = generateHandoffCode();
         const hash = await hashHandoffCode(code);
 

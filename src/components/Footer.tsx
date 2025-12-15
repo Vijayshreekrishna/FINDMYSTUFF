@@ -37,10 +37,10 @@ export const Footer = () => {
     };
 
     return (
-        <footer className="border-t border-blue-700 bg-gradient-to-r from-amber-500/70 to-blue-600/70 py-8">
+        <footer className="border-t border-blue-700 dark:border-zinc-700 bg-gradient-to-r from-amber-500/70 to-blue-600/70 dark:from-zinc-800 dark:to-zinc-900 py-8">
             <Container className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                <p className="text-sm text-blue-100">© {new Date().getFullYear()} FindMyStuff</p>
-                <div className="flex gap-4 text-sm text-blue-100 items-center">
+                <p className="text-sm text-blue-100 dark:text-gray-300">© {new Date().getFullYear()} FindMyStuff</p>
+                <div className="flex gap-4 text-sm text-blue-100 dark:text-gray-300 items-center">
                     <Link href="/" className="hover:text-white transition-colors">Home</Link>
                     <Link href="/feed" className="hover:text-white transition-colors">Feed</Link>
                     <Link href="/report" className="hover:text-white transition-colors">Report</Link>
@@ -48,7 +48,7 @@ export const Footer = () => {
                     {showInstallButton && (
                         <button
                             onClick={handleInstallClick}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors border border-white/30"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-white/20 dark:bg-white/10 hover:bg-white/30 dark:hover:bg-white/20 rounded-lg transition-colors border border-white/30 dark:border-white/20"
                             title="Install App"
                         >
                             <Download size={16} />

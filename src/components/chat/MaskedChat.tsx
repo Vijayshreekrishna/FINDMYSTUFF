@@ -36,7 +36,9 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const [thread, setThread] = useState<Thread | null>(null);
     const [newMessage, setNewMessage] = useState("");
     const [handoffCode, setHandoffCode] = useState("");
-    const [notification, setNotification] = useState<{ message: string, type: 'success' | 'info' } | null>(null);
+    const [showCodeModal, setShowCodeModal] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState("");
+    const [notification, setNotification] = useState<{ message: string, type: 'success' | 'info' | 'error' } | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
     const refreshThread = async () => {
@@ -102,8 +104,14 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
         const claimId = thread.claim._id;
         const res = await fetch(`/api/claims/${claimId}/handoff`, { method: 'POST' });
         const data = await res.json();
-        if (data.code) {
-            alert(`Your Handoff Code is: ${data.code}\nShare this with the claimant ONLY when meeting.`);
+
+        if (data.alreadyGenerated) {
+            setNotification({ message: "Handoff code was already generated for this claim.", type: 'info' });
+        } else if (data.code) {
+            setGeneratedCode(data.code);
+            setShowCodeModal(true);
+        } else if (data.error) {
+            setNotification({ message: data.error, type: 'error' });
         }
     };
 
@@ -113,6 +121,9 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
         const claimId = thread.claim._id;
         const res = await fetch(`/api/claims/${claimId}/handoff/confirm`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ code: handoffCode })
         });
         const data = await res.json();
@@ -120,7 +131,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
             setNotification({ message: "Handoff confirmed! Interaction complete.", type: 'success' });
             setTimeout(() => window.location.reload(), 1500);
         } else {
-            alert(data.error || "Invalid code");
+            setNotification({ message: data.error || "Invalid code", type: 'error' });
         }
     };
 
@@ -135,9 +146,37 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
             {/* Notification Popup */}
             {notification && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4">
-                    <div className={`px-4 py-2 rounded-full shadow-lg text-sm font-medium ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
+                    <div className={`px-4 py-2 rounded-full shadow-lg text-sm font-medium ${notification.type === 'success' ? 'bg-green-600 text-white' :
+                            notification.type === 'error' ? 'bg-red-600 text-white' :
+                                'bg-blue-600 text-white'
                         }`}>
                         {notification.message}
+                    </div>
+                </div>
+            )}
+
+            {/* Handoff Code Modal */}
+            {showCodeModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Handoff Code Generated</h3>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 dark:border-blue-400 rounded-xl p-6 mb-4">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 text-center">Share this code with the claimant:</p>
+                            <div className="text-4xl font-mono font-bold text-center text-blue-600 dark:text-blue-400 tracking-widest">
+                                {generatedCode}
+                            </div>
+                        </div>
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-3 mb-4">
+                            <p className="text-xs text-amber-800 dark:text-amber-300">
+                                <strong>⚠️ Important:</strong> Only share this code when you meet the claimant in person. This code can only be used once.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowCodeModal(false)}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-colors"
+                        >
+                            I've Shared the Code
+                        </button>
                     </div>
                 </div>
             )}
@@ -245,9 +284,10 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                                 <div className="flex gap-2">
                                     <input
                                         value={handoffCode}
-                                        onChange={e => setHandoffCode(e.target.value)}
+                                        onChange={e => setHandoffCode(e.target.value.toUpperCase())}
                                         placeholder="6-digit code"
-                                        className="flex-1 text-sm px-3 py-2 border rounded-xl"
+                                        maxLength={6}
+                                        className="flex-1 text-sm px-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-xl bg-white dark:bg-zinc-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                                     />
                                     <button
                                         onClick={handleHandoffConfirm}

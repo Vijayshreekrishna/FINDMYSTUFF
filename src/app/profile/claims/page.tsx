@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Link as LinkIcon, AlertCircle, CheckCircle2, Clock, XCircle, ArrowLeft, MessageSquare, Bell } from "lucide-react";
+import { NewtonsCradle } from "@/components/ui/NewtonsCradle";
 
 export default function UnifiedClaimsPage() {
     const [activeTab, setActiveTab] = useState<'sent' | 'received'>('sent');
@@ -70,7 +71,9 @@ export default function UnifiedClaimsPage() {
                         🧾 Items You requested
                     </h2>
                     {myClaims === null ? (
-                        <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
+                        <div className="flex justify-center py-12">
+                            <NewtonsCradle size={50} color="#84cc16" />
+                        </div>
                     ) : myClaims.length === 0 ? (
                         <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
                             <p className="text-gray-500 mb-2">You haven't made any claims yet.</p>
@@ -110,7 +113,9 @@ export default function UnifiedClaimsPage() {
                         📬 Claims on your posts
                     </h2>
                     {receivedClaims === null ? (
-                        <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
+                        <div className="flex justify-center py-12">
+                            <NewtonsCradle size={50} color="#84cc16" />
+                        </div>
                     ) : receivedClaims.length === 0 ? (
                         <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
                             <p className="text-gray-500 font-medium">No incoming claims.</p>

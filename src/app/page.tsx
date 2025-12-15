@@ -31,7 +31,7 @@ export default async function Home() {
             <Section
                 title="Recent items"
                 subtitle="A mix of lost and found posts near you."
-                actions={<Link href="/search" className="inline-flex items-center justify-center font-semibold transition-all duration-200 rounded-xl bg-white text-gray-700 border border-gray-200 hover:border-blue-500 hover:text-blue-600 h-9 px-4 text-sm shadow-sm">View all</Link>}
+                actions={<Link href="/search" className="inline-flex items-center justify-center font-semibold transition-all duration-200 rounded-xl bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 h-9 px-4 text-sm shadow-sm">View all</Link>}
             >
                 {/* @ts-ignore */}
                 <ItemsGrid posts={posts} />

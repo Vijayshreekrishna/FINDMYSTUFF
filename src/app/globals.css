@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Configure dark mode to use class strategy for Tailwind v4 */
+@variant dark (.dark &);
+
 @theme {
     --color-blue-50: #CFFFDC;
     --color-blue-100: #A8E6C0;

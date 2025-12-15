@@ -3,11 +3,11 @@ import { PlusCircle, CheckCircle2, Shield } from "lucide-react";
 import { Section } from "@/components/Wrappers";
 
 const Step = ({ n, title, desc, icon }: { n: number; title: string; desc: string; icon: React.ReactNode }) => (
-    <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">{icon}</div>
+    <div className="flex items-start gap-3 rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">{icon}</div>
         <div>
-            <div className="text-sm font-semibold text-gray-900">{n}. {title}</div>
-            <div className="text-sm text-gray-600">{desc}</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">{n}. {title}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">{desc}</div>
         </div>
     </div>
 );
