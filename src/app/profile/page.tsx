@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ProfileDashboard } from "@/components/ProfileDashboard";
 import { getServerSession } from "next-auth";
@@ -6,7 +5,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import dbConnect from "@/lib/db";
 import Post from "@/models/Post";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
+import GotMyStuffSection from "@/components/profile/GotMyStuffSection";
 
 async function getUserPosts(userId: string) {
     await dbConnect();
@@ -50,6 +50,11 @@ export default async function ProfilePage() {
                             Track your lost items and manage requests for items you found.
                         </p>
                     </Link>
+                </div>
+
+                {/* GotMyStuff Section */}
+                <div className="mt-8">
+                    <GotMyStuffSection />
                 </div>
             </div>
         </main>

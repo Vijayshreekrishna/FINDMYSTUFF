@@ -66,6 +66,9 @@ export async function GET(req: NextRequest) {
 
         const query: any = {};
 
+        // Exclude resolved/closed posts from feed
+        query.status = { $nin: ['resolved', 'closed'] };
+
         // Filter by user
         if (userId) {
             query.user = userId;

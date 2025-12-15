@@ -4,13 +4,17 @@ import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Section } from "@/components/Wrappers";
 import { ItemsGrid } from "@/components/ItemsGrid";
+import SuccessStories from "@/components/SuccessStories";
 import dbConnect from "@/lib/db";
 import Post from "@/models/Post";
 
 async function getPosts() {
     await dbConnect();
-    // Fetch latest 6 posts
-    const posts = await Post.find({}).sort({ createdAt: -1 }).limit(6).lean();
+    // Fetch latest 6 posts, exclude resolved/closed
+    const posts = await Post.find({ status: { $nin: ['resolved', 'closed'] } })
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .lean();
 
     return posts.map(post => ({
         ...post,
@@ -36,6 +40,9 @@ export default async function Home() {
                 {/* @ts-ignore */}
                 <ItemsGrid posts={posts} />
             </Section>
+
+            {/* Success Stories Section */}
+            <SuccessStories />
         </main>
     );
 }
