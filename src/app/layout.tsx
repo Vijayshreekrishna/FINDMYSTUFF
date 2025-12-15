@@ -5,7 +5,6 @@ import Providers from "@/components/Providers";
 import PWAEnforcer from "@/components/PWAEnforcer";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import PWAGuard from "@/components/PWAGuard";
-import { TopLoadingBar } from "@/components/ui/GlobalLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,7 +47,6 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <TopLoadingBar />
           <PWAEnforcer>
             <PWAGuard>
               <ConditionalLayout>
