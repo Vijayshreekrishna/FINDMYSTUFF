@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { Icon, divIcon } from "leaflet";
+import { Icon, divIcon, LatLngBounds } from "leaflet";
 import { X, MapPin, Package } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
@@ -33,24 +33,28 @@ interface MapPreviewProps {
     items: MapItem[];
 }
 
-// Custom marker icons
-const lostIcon = new Icon({
-    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+// Custom marker icons with better design
+const createCustomIcon = (color: string, type: string) => {
+    return divIcon({
+        html: `
+            <div class="custom-marker" style="background-color: ${color};">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    ${type === 'lost'
+                ? '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>'
+                : '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm-1 13v-6h2v6h-2zm0-8V5h2v2h-2z"/>'
+            }
+                </svg>
+            </div>
+        `,
+        className: "custom-marker-wrapper",
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36]
+    });
+};
 
-const foundIcon = new Icon({
-    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+const lostIcon = createCustomIcon("#ef4444", "lost");
+const foundIcon = createCustomIcon("#22c55e", "found");
 
 // Custom cluster icon
 const createClusterCustomIcon = (cluster: any) => {
@@ -61,6 +65,22 @@ const createClusterCustomIcon = (cluster: any) => {
         iconSize: [40, 40]
     });
 };
+
+// Component to fit bounds to markers
+function FitBounds({ items }: { items: MapItem[] }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (items.length > 0) {
+            const bounds = new LatLngBounds(
+                items.map(item => [item.location.lat, item.location.lng] as [number, number])
+            );
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+        }
+    }, [items, map]);
+
+    return null;
+}
 
 export default function MapPreview({ items }: MapPreviewProps) {
     const [showFullMap, setShowFullMap] = useState(false);
@@ -95,13 +115,14 @@ export default function MapPreview({ items }: MapPreviewProps) {
         <>
             {/* Preview Map */}
             <div
-                className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow group"
+                className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow group relative"
                 onClick={() => setShowFullMap(true)}
+                style={{ zIndex: 1 }}
             >
-                <div className="relative h-[400px]">
+                <div className="relative h-[300px]">
                     <MapContainer
-                        center={center}
-                        zoom={12}
+                        center={[0, 0]}
+                        zoom={13}
                         style={{ height: "100%", width: "100%" }}
                         scrollWheelZoom={false}
                         dragging={false}
@@ -112,6 +133,7 @@ export default function MapPreview({ items }: MapPreviewProps) {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
+                        <FitBounds items={validItems} />
                         <MarkerClusterGroup
                             chunkedLoading
                             iconCreateFunction={createClusterCustomIcon}
@@ -159,13 +181,16 @@ export default function MapPreview({ items }: MapPreviewProps) {
 
             {/* Full Map Modal */}
             {showFullMap && (
-                <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-6xl h-[80vh] flex flex-col overflow-hidden">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-700">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Items Near You</h2>
                             <button
-                                onClick={() => setShowFullMap(false)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowFullMap(false);
+                                }}
                                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                             >
                                 <X size={20} className="text-gray-600 dark:text-gray-400" />
@@ -175,7 +200,7 @@ export default function MapPreview({ items }: MapPreviewProps) {
                         {/* Map */}
                         <div className="flex-1 relative">
                             <MapContainer
-                                center={center}
+                                center={[0, 0]}
                                 zoom={13}
                                 style={{ height: "100%", width: "100%" }}
                                 scrollWheelZoom={true}
@@ -184,6 +209,7 @@ export default function MapPreview({ items }: MapPreviewProps) {
                                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
+                                <FitBounds items={validItems} />
                                 <MarkerClusterGroup
                                     chunkedLoading
                                     iconCreateFunction={createClusterCustomIcon}
@@ -261,6 +287,24 @@ export default function MapPreview({ items }: MapPreviewProps) {
                     font-size: 14px;
                     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                     border: 3px solid white;
+                }
+                .custom-marker-wrapper {
+                    background: transparent;
+                    border: none;
+                }
+                .custom-marker {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50% 50% 50% 0;
+                    transform: rotate(-45deg);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+                    border: 2px solid white;
+                }
+                .custom-marker svg {
+                    transform: rotate(45deg);
                 }
             `}</style>
         </>

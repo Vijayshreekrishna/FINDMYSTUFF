@@ -26,10 +26,10 @@ export async function GET() {
             .limit(20)
             .lean();
 
-        // Mask user information and format response
-        const maskedStories = successfulClaims
+        // Format response with real user names
+        const successStories = successfulClaims
             .filter((claim: any) => claim.post) // Ensure post exists
-            .map((claim: any, index: number) => ({
+            .map((claim: any) => ({
                 id: claim._id,
                 post: {
                     title: claim.post.title,
@@ -38,13 +38,13 @@ export async function GET() {
                     category: claim.post.category,
                     location: claim.post.location?.address || 'Unknown location',
                 },
-                finder: `User ${String.fromCharCode(65 + (index % 26))}`, // User A, B, C, etc.
-                owner: `User ${String.fromCharCode(90 - (index % 26))}`, // User Z, Y, X, etc.
+                finder: claim.post.user?.name || 'Anonymous',
+                owner: claim.claimant?.name || 'Anonymous',
                 completedAt: claim.updatedAt,
                 createdAt: claim.post.createdAt,
             }));
 
-        return NextResponse.json(maskedStories);
+        return NextResponse.json(successStories);
     } catch (error: any) {
         console.error("Error fetching success stories:", error);
         return NextResponse.json(
