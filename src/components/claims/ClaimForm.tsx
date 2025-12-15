@@ -57,9 +57,16 @@ export default function ClaimForm({ postId, onSuccess, onCancel }: ClaimFormProp
                 return;
             }
 
-            const { claim } = await res.json();
-            if (onSuccess) onSuccess(claim._id);
-            else router.refresh();
+            const { claim, threadId } = await res.json();
+
+            // Redirect directly to chat if threadId exists
+            if (threadId) {
+                router.push(`/messages/${threadId}`);
+            } else if (onSuccess) {
+                onSuccess(claim._id);
+            } else {
+                router.push('/profile/claims');
+            }
 
         } catch (e) {
             console.error(e);

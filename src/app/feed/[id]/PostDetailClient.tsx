@@ -184,9 +184,7 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                                     onCancel={() => setShowClaimForm(false)}
                                     onSuccess={(claimId) => {
                                         setShowClaimForm(false);
-                                        // Redirect to messages/claim_thread or success?
-                                        router.push(`/dashboard/claims`); // Or similar
-                                        alert("Claim submitted! Check your dashboard.");
+                                        // ClaimForm will handle redirect to chat
                                     }}
                                 />
                             </div>
