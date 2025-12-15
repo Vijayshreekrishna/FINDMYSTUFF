@@ -4,7 +4,17 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Section } from "@/components/Wrappers";
-import { SearchBar } from "@/components/SearchBar";
+import dynamic from "next/dynamic";
+
+// Dynamically import MapPreview to avoid SSR issues with Leaflet
+const MapPreview = dynamic(() => import("@/components/map/MapPreview"), {
+    ssr: false,
+    loading: () => (
+        <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-8 shadow-sm">
+            <div className="h-[400px] bg-gray-100 dark:bg-zinc-700 rounded-xl animate-pulse" />
+        </div>
+    )
+});
 
 const brand = {
     primary: "text-amber-500",
@@ -17,7 +27,11 @@ const Stat = ({ number, label }: { number: string; label: string }) => (
     </div>
 );
 
-export const Hero = () => (
+interface HeroProps {
+    mapItems?: any[];
+}
+
+export const Hero = ({ mapItems = [] }: HeroProps) => (
     <Section>
         <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
             <div>
@@ -47,27 +61,8 @@ export const Hero = () => (
                 </div>
             </div>
 
-            <aside className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5 shadow-sm">
-                <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">Quick Search</h3>
-                <Suspense fallback={<div className="h-12 bg-gray-100 rounded-full animate-pulse" />}>
-                    <SearchBar compact />
-                </Suspense>
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                    {[
-                        { name: "Electronics", category: "electronics" },
-                        { name: "Bags", category: "bags" },
-                        { name: "Documents", category: "documents" }
-                    ].map((item) => (
-                        <Link
-                            key={item.category}
-                            href={`/feed?category=${item.category}`}
-                            className="rounded-xl border border-gray-300 dark:border-zinc-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors text-center"
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                </div>
-            </aside>
+            {/* Map Preview */}
+            <MapPreview items={mapItems} />
         </div>
     </Section>
 );

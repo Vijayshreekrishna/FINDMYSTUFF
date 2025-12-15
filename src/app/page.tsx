@@ -30,7 +30,7 @@ export default async function Home() {
 
     return (
         <main>
-            <Hero />
+            <Hero mapItems={posts} />
             <HowItWorks />
             <Section
                 title="Recent items"
