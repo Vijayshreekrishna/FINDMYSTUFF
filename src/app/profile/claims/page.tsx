@@ -108,10 +108,7 @@ export default function UnifiedClaimsPage() {
             )}
 
             {activeTab === 'received' && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        📬 Claims on your posts
-                    </h2>
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                     {receivedClaims === null ? (
                         <div className="flex justify-center py-12">
                             <NewtonsCradle size={50} color="#84cc16" />
@@ -122,32 +119,77 @@ export default function UnifiedClaimsPage() {
                             <p className="text-sm text-gray-400 mt-1">Claims on items you found will appear here.</p>
                         </div>
                     ) : (
-                        <ul className="grid gap-4">
-                            {receivedClaims.map((c) => (
-                                <li key={c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between md:justify-start gap-4 mb-2">
-                                                <h3 className="font-semibold text-lg text-gray-900">{c.post?.title ?? "Item"}</h3>
-                                                <StatusBadge status={c.status} />
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <span className="font-medium">Claimant:</span> {c.claimant?.email || "Anonymous"}
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 w-full md:w-auto">
-                                            {c.chatThread ? (
-                                                <Link href={`/messages/${c.chatThread}`} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
-                                                    <MessageSquare size={16} /> Chat & Verify
-                                                </Link>
-                                            ) : (
-                                                <span className="text-sm text-gray-400 italic px-2">Chat unavailable</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                        <>
+                            {/* Active Claims */}
+                            {receivedClaims.filter((c: any) => c.status !== 'approved').length > 0 && (
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                        📬 Active Claims ({receivedClaims.filter((c: any) => c.status !== 'approved').length})
+                                    </h2>
+                                    <ul className="grid gap-4">
+                                        {receivedClaims
+                                            .filter((c: any) => c.status !== 'approved')
+                                            .map((c) => (
+                                                <li key={c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
+                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between md:justify-start gap-4 mb-2">
+                                                                <h3 className="font-semibold text-lg text-gray-900">{c.post?.title ?? "Item"}</h3>
+                                                                <StatusBadge status={c.status} />
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                                <span className="font-medium">Claimant:</span> {c.claimant?.email || "Anonymous"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 w-full md:w-auto">
+                                                            {c.chatThread ? (
+                                                                <Link href={`/messages/${c.chatThread}`} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                                                                    <MessageSquare size={16} /> Chat & Verify
+                                                                </Link>
+                                                            ) : (
+                                                                <span className="text-sm text-gray-400 italic px-2">Chat unavailable</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Completed/Returned Claims */}
+                            {receivedClaims.filter((c: any) => c.status === 'approved').length > 0 && (
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                                        ✅ Completed Returns ({receivedClaims.filter((c: any) => c.status === 'approved').length})
+                                    </h2>
+                                    <ul className="grid gap-4">
+                                        {receivedClaims
+                                            .filter((c: any) => c.status === 'approved')
+                                            .map((c) => (
+                                                <li key={c._id} className="border border-green-200 bg-green-50 rounded-2xl p-5 shadow-sm">
+                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between md:justify-start gap-4 mb-2">
+                                                                <h3 className="font-semibold text-lg text-gray-900">{c.post?.title ?? "Item"}</h3>
+                                                                <StatusBadge status={c.status} />
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                                <span className="font-medium">Claimant:</span> {c.claimant?.email || "Anonymous"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 w-full md:w-auto">
+                                                            <div className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-500 font-medium rounded-xl cursor-not-allowed">
+                                                                <MessageSquare size={16} /> Completed
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             )}
