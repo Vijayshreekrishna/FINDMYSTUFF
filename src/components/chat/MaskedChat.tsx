@@ -22,7 +22,7 @@ interface Thread {
     finder: string;
     claim: {
         _id: string;
-        status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired';
+        status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired' | 'completed';
         claimerProof?: {
             imageUrl: string;
             note?: string;
@@ -147,8 +147,8 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
             {notification && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4">
                     <div className={`px-4 py-2 rounded-full shadow-lg text-sm font-medium ${notification.type === 'success' ? 'bg-green-600 text-white' :
-                            notification.type === 'error' ? 'bg-red-600 text-white' :
-                                'bg-blue-600 text-white'
+                        notification.type === 'error' ? 'bg-red-600 text-white' :
+                            'bg-blue-600 text-white'
                         }`}>
                         {notification.message}
                     </div>
@@ -225,13 +225,17 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                             value={newMessage}
                             onChange={e => setNewMessage(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                            placeholder={thread.isClosed ? "Thread is closed" : "Type a message..."}
-                            disabled={thread.isClosed}
+                            placeholder={
+                                thread.isClosed ? "Thread is closed" :
+                                    thread.claim.status === 'completed' ? "Handoff completed" :
+                                        "Type a message..."
+                            }
+                            disabled={thread.isClosed || thread.claim.status === 'completed'}
                             className="flex-1 px-4 py-2 border rounded-xl bg-gray-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-gray-100 caret-blue-500 dark:caret-white"
                         />
                         <button
                             onClick={sendMessage}
-                            disabled={thread.isClosed || !newMessage.trim()}
+                            disabled={thread.isClosed || thread.claim.status === 'completed' || !newMessage.trim()}
                             className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
                         >
                             <Send size={18} />
@@ -264,7 +268,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                     />
                 )}
 
-                {/* 2. Handoff Logic (Only show if approved) */}
+                {/* 2. Handoff Logic (Only show if approved, hide when completed) */}
                 {thread.claim.status === 'approved' && (
                     <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-700 shadow-sm">
                         <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm">Meetup & Handoff</h4>
@@ -298,6 +302,21 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                                 </div>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* 3. Completion Message */}
+                {thread.claim.status === 'completed' && (
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-2xl border-2 border-green-500 dark:border-green-400 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white">
+                                ✓
+                            </div>
+                            <h4 className="font-bold text-green-900 dark:text-green-100 text-sm">Handoff Complete!</h4>
+                        </div>
+                        <p className="text-xs text-green-800 dark:text-green-200">
+                            This item has been successfully returned. Thank you for using FindMyStuff!
+                        </p>
                     </div>
                 )}
             </div>

@@ -23,7 +23,7 @@ const brand = {
 const Stat = ({ number, label }: { number: string; label: string }) => (
     <div className="rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
         <div className="text-2xl font-bold text-gray-900 dark:text-white">{number}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
+        <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">{label}</div>
     </div>
 );
 
@@ -43,7 +43,7 @@ export const Hero = ({ mapItems = [] }: HeroProps) => (
                 >
                     Lost something? <span className={brand.primary}>Find it fast.</span>
                 </motion.h1>
-                <p className="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                <p className="mt-3 text-lg text-gray-700 dark:text-gray-200 font-medium">
                     A community-driven lost & found with smart matching and location tagging.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">

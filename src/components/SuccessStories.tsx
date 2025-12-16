@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles, Package, Calendar, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 interface SuccessStory {
     id: string;
@@ -45,30 +46,110 @@ export default function SuccessStories() {
         return null; // Don't show section if no stories
     }
 
+    // Animation variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
+
+    const cardVariants = {
+        hidden: {
+            opacity: 0,
+            y: 100,
+            rotateX: -15,
+            z: -100,
+            scale: 0.8
+        },
+        visible: {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            z: 0,
+            scale: 1,
+            transition: {
+                type: "spring",
+                stiffness: 80,
+                damping: 15,
+                duration: 0.8
+            }
+        }
+    };
+
+    const headerVariants = {
+        hidden: { opacity: 0, y: -20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.6,
+                ease: "easeOut"
+            }
+        }
+    };
+
     return (
-        <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-zinc-900 dark:to-zinc-800">
-            <div className="container mx-auto px-4">
+        <section className="relative py-16 overflow-hidden">
+            {/* Gradient Background Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 via-emerald-50/30 to-green-50/40 dark:from-green-900/10 dark:via-emerald-900/5 dark:to-green-900/10 pointer-events-none"></div>
+
+            {/* Top Gradient Fade */}
+            <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-white dark:from-zinc-950 via-white/50 dark:via-zinc-950/50 to-transparent pointer-events-none z-10"></div>
+
+            {/* Bottom Gradient Fade */}
+            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white dark:from-zinc-950 via-white/50 dark:via-zinc-950/50 to-transparent pointer-events-none z-10"></div>
+
+            <div className="container mx-auto px-4 relative z-20">
                 {/* Header */}
-                <div className="text-center mb-12">
+                <motion.div
+                    className="text-center mb-12"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={headerVariants}
+                >
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-medium mb-4">
                         <TrendingUp size={16} />
-                        Community Success
+                        Success Stories
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                        Successfully GotMyStuff! 🎉
+                        GotMyStuff! 🎉
                     </h2>
                     <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Celebrating our community's successful reunions. These items found their way home!
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Stories Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {stories.map((story, index) => (
-                        <div
+                <motion.div
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    style={{ perspective: "1000px" }}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-50px" }}
+                    variants={containerVariants}
+                >
+                    {stories.map((story) => (
+                        <motion.div
                             key={story.id}
-                            className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
-                            style={{ animationDelay: `${index * 100}ms` }}
+                            variants={cardVariants}
+                            whileHover={{
+                                y: -12,
+                                scale: 1.05,
+                                rotateY: 5,
+                                z: 50,
+                                transition: { duration: 0.3 }
+                            }}
+                            style={{
+                                transformStyle: "preserve-3d",
+                                transformPerspective: 1000
+                            }}
+                            className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
                         >
                             {/* Image */}
                             <div className="relative h-48 bg-gray-100 dark:bg-zinc-700 overflow-hidden">
@@ -76,7 +157,7 @@ export default function SuccessStories() {
                                     <img
                                         src={story.post.image}
                                         alt={story.post.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
@@ -85,10 +166,21 @@ export default function SuccessStories() {
                                 )}
 
                                 {/* Success Badge */}
-                                <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                                <motion.div
+                                    className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg"
+                                    initial={{ scale: 0, rotate: -180 }}
+                                    whileInView={{ scale: 1, rotate: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{
+                                        delay: 0.3,
+                                        type: "spring",
+                                        stiffness: 200,
+                                        damping: 10
+                                    }}
+                                >
                                     <Sparkles size={12} />
                                     Returned
-                                </div>
+                                </motion.div>
                             </div>
 
                             {/* Content */}
@@ -118,17 +210,23 @@ export default function SuccessStories() {
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
 
                 {/* Footer Message */}
                 {stories.length > 0 && (
-                    <div className="text-center mt-12">
+                    <motion.div
+                        className="text-center mt-12"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                    >
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                             <span className="font-semibold text-green-600 dark:text-green-400">{stories.length}+</span> items successfully returned to their owners
                         </p>
-                    </div>
+                    </motion.div>
                 )}
             </div>
         </section>

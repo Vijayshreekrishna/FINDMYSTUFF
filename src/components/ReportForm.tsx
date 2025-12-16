@@ -49,51 +49,157 @@ export const ReportForm = () => {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Type</label>
+                <label className="mb-3 block text-sm font-semibold text-gray-900 dark:text-gray-100">Type</label>
                 <div className="flex gap-4">
-                    <label className="flex items-center gap-2">
+                    <label className={formData.type === "lost" ? "radio-label-active" : "radio-label"}>
                         <input
                             type="radio"
                             name="type"
                             value="lost"
                             checked={formData.type === "lost"}
                             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="text-blue-600"
+                            className="radio-input"
                         />
-                        <span>Lost Item</span>
+                        <div className="radio-button">LOST</div>
                     </label>
-                    <label className="flex items-center gap-2">
+                    <label className={formData.type === "found" ? "radio-label-active" : "radio-label"}>
                         <input
                             type="radio"
                             name="type"
                             value="found"
                             checked={formData.type === "found"}
                             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="text-blue-600"
+                            className="radio-input"
                         />
-                        <span>Found Item</span>
+                        <div className="radio-button">FOUND</div>
                     </label>
                 </div>
             </div>
 
+            <style jsx>{`
+                .radio-label {
+                    cursor: pointer;
+                }
+                .radio-button {
+                    width: 75px;
+                    height: 38px;
+                    background: #1f2937;
+                    color: #9ca3af;
+                    border: 2px solid #374151;
+                    box-shadow: 0 4px #1f2937, 0 8px #111827;
+                    font-size: 14px;
+                    font-weight: bold;
+                    text-align: center;
+                    line-height: 38px;
+                    cursor: pointer;
+                    border-radius: 10px;
+                    transition: all 0.2s ease-in-out;
+                    position: relative;
+                    user-select: none;
+                }
+                .radio-input {
+                    display: none;
+                }
+                /* LOST button when checked */
+                .radio-label-active:has(input[value="lost"]) .radio-button {
+                    background: #ef4444;
+                    color: white;
+                    box-shadow: 0 5px #991b1b, 0 10px #7f1d1d;
+                    transform: translateY(3px);
+                    border-color: #fca5a5;
+                }
+                /* FOUND button when checked */
+                .radio-label-active:has(input[value="found"]) .radio-button {
+                    background: #22c55e;
+                    color: white;
+                    box-shadow: 0 5px #15803d, 0 10px #166534;
+                    transform: translateY(3px);
+                    border-color: #86efac;
+                }
+                /* Hover effects */
+                .radio-button:hover {
+                    transform: translateY(1px);
+                    box-shadow: 0 4px #1f2937, 0 8px #111827;
+                }
+                .radio-label-active .radio-button:hover {
+                    transform: translateY(4px);
+                }
+                
+                /* Upload Button Styles */
+                .upload-button {
+                    background: #2E2E2E;
+                    border: 2px solid transparent;
+                    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24);
+                    transition: all 0.3s ease-in-out;
+                    cursor: pointer;
+                    color: white;
+                }
+                .upload-button:hover {
+                    background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+                }
+                .upload-button:active {
+                    transform: translateY(0.2em);
+                }
+                .upload-text {
+                    font-weight: 800;
+                    letter-spacing: 2px;
+                    font-size: 12px;
+                    background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    transition: all 0.3s ease-in-out;
+                }
+                .upload-button:hover .upload-text {
+                    background: #2E2E2E;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+                .upload-button:hover :global(svg) {
+                    color: white;
+                }
+                
+                /* Neumorphic Input Styles */
+                .neumorphic-input {
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                    padding: 1rem;
+                    border-radius: 1rem;
+                    background: #e8e8e8;
+                    box-shadow: 10px 10px 30px rgba(197, 197, 197, 0.4), -10px -10px 30px rgba(255, 255, 255, 0.6);
+                    transition: all 0.3s ease-in-out;
+                    color: #2E2E2E;
+                    font-size: 14px;
+                }
+                .neumorphic-input:focus {
+                    outline: none;
+                    border: 1px solid rgba(63, 94, 251, 0.3);
+                    background: #e8e8e8;
+                    box-shadow: inset 8px 8px 20px rgba(197, 197, 197, 0.3), inset -8px -8px 20px rgba(255, 255, 255, 0.5);
+                }
+                .neumorphic-input::placeholder {
+                    color: #999;
+                }
+            `}</style>
+
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Item Name</label>
+                <label className="mb-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">Item Name</label>
                 <input
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                    className="neumorphic-input w-full"
                     placeholder="e.g., Black backpack"
                 />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Category</label>
+                    <label className="mb-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">Category</label>
                     <select
                         value={formData.category}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="w-full rounded-xl border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                        className="neumorphic-input w-full"
                     >
                         <option>Electronics</option>
                         <option>Bags</option>
@@ -104,19 +210,19 @@ export const ReportForm = () => {
                     </select>
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Date</label>
+                    <label className="mb-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">Date</label>
                     <input
                         type="date"
                         required
                         value={formData.date}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full rounded-xl border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                        className="neumorphic-input w-full"
                     />
                 </div>
             </div>
 
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Location</label>
+                <label className="mb-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">Location</label>
                 <div className="rounded-xl border border-gray-300 p-3 bg-white space-y-3">
                     <input
                         readOnly
@@ -132,20 +238,20 @@ export const ReportForm = () => {
             </div>
 
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+                <label className="mb-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">Description</label>
                 <textarea
                     rows={3}
                     required
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                    className="neumorphic-input w-full"
                     placeholder="Distinct marks, color, brand, etc."
                 />
             </div>
 
             {/* Image Upload with Cloudinary */}
             <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Upload Images</label>
+                <label className="mb-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">Upload Images</label>
                 {process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ? (
                     <div className="grid grid-cols-3 gap-3">
                         {images.map((img) => (
@@ -170,10 +276,10 @@ export const ReportForm = () => {
                                 <button
                                     type="button"
                                     onClick={() => open()}
-                                    className="aspect-square rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-blue-600"
+                                    className="upload-button aspect-square rounded-xl flex flex-col items-center justify-center gap-2"
                                 >
                                     <UploadCloud size={24} />
-                                    <span className="text-xs font-semibold">Upload</span>
+                                    <span className="upload-text">UPLOAD</span>
                                 </button>
                             )}
                         </CldUploadWidget>

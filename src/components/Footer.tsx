@@ -39,12 +39,12 @@ export const Footer = () => {
     return (
         <footer className="border-t border-blue-700 dark:border-zinc-700 bg-gradient-to-r from-amber-500/70 to-blue-600/70 dark:from-zinc-800 dark:to-zinc-900 py-8">
             <Container className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                <p className="text-sm text-blue-100 dark:text-gray-300">© {new Date().getFullYear()} FindMyStuff</p>
-                <div className="flex gap-4 text-sm text-blue-100 dark:text-gray-300 items-center">
-                    <Link href="/" className="hover:text-white transition-colors">Home</Link>
-                    <Link href="/feed" className="hover:text-white transition-colors">Feed</Link>
-                    <Link href="/report" className="hover:text-white transition-colors">Report</Link>
-                    <Link href="/profile" className="hover:text-white transition-colors">Profile</Link>
+                <p className="text-sm text-white dark:text-gray-100 font-medium">© {new Date().getFullYear()} FindMyStuff</p>
+                <div className="flex gap-4 text-base text-white dark:text-gray-100 items-center font-medium">
+                    <Link href="/" className="hover:text-gray-200 dark:hover:text-white transition-colors">Home</Link>
+                    <Link href="/feed" className="hover:text-gray-200 dark:hover:text-white transition-colors">Feed</Link>
+                    <Link href="/report" className="hover:text-gray-200 dark:hover:text-white transition-colors">Report</Link>
+                    <Link href="/profile" className="hover:text-gray-200 dark:hover:text-white transition-colors">Profile</Link>
                     {showInstallButton && (
                         <button
                             onClick={handleInstallClick}

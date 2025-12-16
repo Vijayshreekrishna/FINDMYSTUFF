@@ -48,8 +48,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             return NextResponse.json({ error: "Invalid code" }, { status: 400 });
         }
 
-        // Success! 
-        claim.status = 'approved';
+        // Success! Mark as completed (not just approved)
+        claim.status = 'completed';
+        await claim.save();
 
         // Update Post
         // Cast to any because it is populated
@@ -75,8 +76,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         return NextResponse.json({ success: true });
 
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Error" }, { status: 500 });
+    } catch (error: any) {
+        console.error('❌ Handoff confirmation error:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        return NextResponse.json({
+            error: "Error confirming handoff",
+            details: error.message
+        }, { status: 500 });
     }
 }

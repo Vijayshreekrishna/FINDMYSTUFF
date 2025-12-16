@@ -3,7 +3,7 @@ import { Schema, model, models, type Document, type Model, Types } from 'mongoos
 export interface IClaim extends Document {
     post: Types.ObjectId;
     claimant: Types.ObjectId;
-    status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired';
+    status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired' | 'completed';
     verificationStatus: 'unverified' | 'email_verified' | 'fully_verified';
     score: number;
     answers: Record<string, any>;
@@ -35,7 +35,7 @@ const ClaimSchema = new Schema<IClaim>(
         claimant: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         status: {
             type: String,
-            enum: ['pending', 'awaiting_verification', 'approved', 'rejected', 'expired'],
+            enum: ['pending', 'awaiting_verification', 'approved', 'rejected', 'expired', 'completed'],
             default: 'pending',
         },
         verificationStatus: {

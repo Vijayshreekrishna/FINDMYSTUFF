@@ -19,10 +19,10 @@ export async function GET() {
         // @ts-ignore
         const userId = session.user.id;
 
-        // Fetch approved claims where user is the claimant
+        // Fetch completed claims (after handoff confirmation) where user is the claimant
         const gotMyStuff = await Claim.find({
             claimant: userId,
-            status: 'approved'
+            status: 'completed'
         })
             .populate({
                 path: 'post',

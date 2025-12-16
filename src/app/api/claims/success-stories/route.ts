@@ -8,8 +8,8 @@ export async function GET() {
     try {
         await dbConnect();
 
-        // Fetch approved claims with post details
-        const successfulClaims = await Claim.find({ status: 'approved' })
+        // Fetch completed claims (after handoff confirmation) with post details
+        const successfulClaims = await Claim.find({ status: 'completed' })
             .populate({
                 path: 'post',
                 select: 'title images type category location createdAt',

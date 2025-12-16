@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { Icon, divIcon, LatLngBounds } from "leaflet";
 import { X, MapPin, Package } from "lucide-react";
+import { useTheme } from "next-themes";
 import "leaflet/dist/leaflet.css";
 
 // Fix for default marker icons in Next.js
@@ -33,34 +34,33 @@ interface MapPreviewProps {
     items: MapItem[];
 }
 
-// Custom marker icons with better design
-const createCustomIcon = (color: string, type: string) => {
+// Custom marker icons - simple colored dots
+const createCustomIcon = (color: string) => {
     return divIcon({
-        html: `
-            <div class="custom-marker" style="background-color: ${color};">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                    ${type === 'lost'
-                ? '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>'
-                : '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm-1 13v-6h2v6h-2zm0-8V5h2v2h-2z"/>'
-            }
-                </svg>
-            </div>
-        `,
-        className: "custom-marker-wrapper",
-        iconSize: [36, 36],
-        iconAnchor: [18, 36],
-        popupAnchor: [0, -36]
+        html: `<div class="simple-dot" style="background-color: ${color};"></div>`,
+        className: "simple-dot-wrapper",
+        iconSize: [12, 12],
+        iconAnchor: [6, 6],
+        popupAnchor: [0, -6]
     });
 };
 
-const lostIcon = createCustomIcon("#ef4444", "lost");
-const foundIcon = createCustomIcon("#22c55e", "found");
+const lostIcon = createCustomIcon("#ef4444");
+const foundIcon = createCustomIcon("#22c55e");
 
-// Custom cluster icon
+// Custom cluster icon - show colored dots instead of numbers
 const createClusterCustomIcon = (cluster: any) => {
-    const count = cluster.getChildCount();
+    const markers = cluster.getAllChildMarkers();
+    const lostCount = markers.filter((m: any) => m.options.icon === lostIcon).length;
+    const foundCount = markers.filter((m: any) => m.options.icon === foundIcon).length;
+
     return divIcon({
-        html: `<div class="cluster-icon">${count}</div>`,
+        html: `
+            <div class="dot-cluster">
+                ${lostCount > 0 ? `<div class="cluster-dot red-dot"></div>` : ''}
+                ${foundCount > 0 ? `<div class="cluster-dot green-dot"></div>` : ''}
+            </div>
+        `,
         className: "custom-marker-cluster",
         iconSize: [40, 40]
     });
@@ -85,6 +85,12 @@ function FitBounds({ items }: { items: MapItem[] }) {
 export default function MapPreview({ items }: MapPreviewProps) {
     const [showFullMap, setShowFullMap] = useState(false);
     const [selectedItem, setSelectedItem] = useState<MapItem | null>(null);
+    const { theme, resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Filter items with valid locations
     const validItems = items.filter(item =>
@@ -111,6 +117,18 @@ export default function MapPreview({ items }: MapPreviewProps) {
         ]
         : [0, 0];
 
+    // Determine if dark mode is active
+    const isDark = mounted && (resolvedTheme === 'dark' || theme === 'dark');
+
+    // Tile layer URLs
+    const tileUrl = isDark
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+    const tileAttribution = isDark
+        ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
     return (
         <>
             {/* Preview Map */}
@@ -130,8 +148,8 @@ export default function MapPreview({ items }: MapPreviewProps) {
                         doubleClickZoom={false}
                     >
                         <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution={tileAttribution}
+                            url={tileUrl}
                         />
                         <FitBounds items={validItems} />
                         <MarkerClusterGroup
@@ -206,8 +224,8 @@ export default function MapPreview({ items }: MapPreviewProps) {
                                 scrollWheelZoom={true}
                             >
                                 <TileLayer
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    attribution={tileAttribution}
+                                    url={tileUrl}
                                 />
                                 <FitBounds items={validItems} />
                                 <MarkerClusterGroup
@@ -274,37 +292,40 @@ export default function MapPreview({ items }: MapPreviewProps) {
                     background: transparent;
                     border: none;
                 }
-                .cluster-icon {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
+                .dot-cluster {
+                    background: rgba(255, 255, 255, 0.9);
                     border-radius: 50%;
                     width: 40px;
                     height: 40px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-weight: bold;
-                    font-size: 14px;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    border: 3px solid white;
+                    gap: 4px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    border: 2px solid rgba(0, 0, 0, 0.1);
                 }
-                .custom-marker-wrapper {
+                .cluster-dot {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                }
+                .red-dot {
+                    background-color: #ef4444;
+                }
+                .green-dot {
+                    background-color: #22c55e;
+                }
+                .simple-dot-wrapper {
                     background: transparent;
                     border: none;
                 }
-                .custom-marker {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50% 50% 50% 0;
-                    transform: rotate(-45deg);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+                .simple-dot {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
                     border: 2px solid white;
-                }
-                .custom-marker svg {
-                    transform: rotate(45deg);
                 }
             `}</style>
         </>

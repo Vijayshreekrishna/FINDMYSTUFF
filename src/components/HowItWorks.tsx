@@ -7,7 +7,7 @@ const Step = ({ n, title, desc, icon }: { n: number; title: string; desc: string
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">{icon}</div>
         <div>
             <div className="text-sm font-semibold text-gray-900 dark:text-white">{n}. {title}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">{desc}</div>
+            <div className="text-sm text-gray-700 dark:text-gray-200 font-medium">{desc}</div>
         </div>
     </div>
 );

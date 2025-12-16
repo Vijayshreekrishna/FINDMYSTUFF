@@ -35,27 +35,9 @@ export default async function ProfilePage() {
             {/* @ts-ignore */}
             <ProfileDashboard posts={posts} user={session.user} />
 
-            {/* Claim Management Links */}
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-                <div className="grid md:grid-cols-1 gap-4">
-                    {/* Unified Claim Management */}
-                    <Link
-                        href="/profile/claims"
-                        className="block rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 hover:bg-gray-50 dark:hover:bg-zinc-700 transition shadow-sm"
-                    >
-                        <h3 className="font-semibold text-lg text-green-700 dark:text-green-500 flex items-center gap-2">
-                            🧾 Claim Management
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                            Track your lost items and manage requests for items you found.
-                        </p>
-                    </Link>
-                </div>
-
-                {/* GotMyStuff Section */}
-                <div className="mt-8">
-                    <GotMyStuffSection />
-                </div>
+            {/* GotMyStuff Section */}
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+                <GotMyStuffSection />
             </div>
         </main>
     );

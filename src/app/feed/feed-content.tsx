@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import PostCard from "@/components/post-card";
-// import { useDebounce } from "@/hooks/useDebounce"; // No longer needed as SearchBar handles submit
 import { Button } from "@/components/ui/Button";
-import { Skeleton } from "@/components/ui/Skeleton";
-import { Plus, Search as SearchIcon, Layers, Search, CheckCircle, Loader2 } from "lucide-react";
+import { Plus, Layers, Search, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { SearchBar } from "@/components/SearchBar";
@@ -17,100 +15,76 @@ export default function FeedContent() {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Derived state from URL
     const search = searchParams.get("q") || "";
     const category = searchParams.get("category") || "";
-    // We can keep 'type' (lost/found) as local state or sync it too. User likely wants basic filters first. 
-    // Let's keep 'type' local or sync it? Let's sync it for consistency since we are "enhancing".
     const type = searchParams.get("type") || "all";
 
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
-    const [page, setPage] = useState(0);
-    const observerTarget = useRef(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPosts, setTotalPosts] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
 
-    // Debounce isn't strictly needed for fetch trigger if we rely on URL changes, 
-    // but the SearchBar handles the submission. We just react to URL changes.
+    // Responsive posts per page
+    const postsPerPage = isMobile ? 12 : 16;
+    const totalPages = Math.ceil(totalPosts / postsPerPage);
 
+    // Detect mobile on mount and resize
     useEffect(() => {
-        // Reset and fetch when URL params change
-        setPage(0);
-        setPosts([]);
-        setHasMore(true);
-        fetchPosts(0, true);
-    }, [search, category, type]);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
-                    loadMore();
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        if (observerTarget.current) observer.observe(observerTarget.current);
-        return () => {
-            if (observerTarget.current) observer.unobserve(observerTarget.current);
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
         };
-    }, [hasMore, loading, loadingMore, page]);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
-    const fetchPosts = async (pageNum: number, isInitial = false) => {
-        if (isInitial) setLoading(true);
-        else setLoadingMore(true);
+    useEffect(() => {
+        setCurrentPage(1);
+        fetchPosts(1);
+    }, [search, category, type, postsPerPage]);
+
+    const fetchPosts = async (pageNum: number) => {
+        setLoading(true);
 
         try {
             const params = new URLSearchParams();
             if (type !== "all") params.append("type", type);
             if (category) params.append("category", category);
-            if (search) params.append("q", search); // match API expectation
-            params.append("skip", (pageNum * 12).toString());
-            params.append("limit", "12");
+            if (search) params.append("search", search);
 
-            // Note: Ensure API endpoint handles 'q' or 'search' param correctly. 
-            // Previous code used 'search', SearchBar uses 'q'. Let's standardize on 'q' or map it.
-            // The API expects 'search' based on previous code `params.append("search", debouncedSearch)`.
-            // We should map 'q' to 'search' here if API needs it.
-            // Actually, let's fix the API param key in this call:
-            const apiParams = new URLSearchParams(params);
-            if (search) {
-                apiParams.delete("q");
-                apiParams.append("search", search);
-            }
+            const skip = (pageNum - 1) * postsPerPage;
+            params.append("skip", skip.toString());
+            params.append("limit", postsPerPage.toString());
 
-            const res = await fetch(`/api/posts?${apiParams.toString()}`);
+            // Add timestamp to prevent caching
+            params.append("_t", Date.now().toString());
+
+            const res = await fetch(`/api/posts?${params.toString()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
             const data = await res.json();
 
-            const postsData = data.posts || [];
-
-            if (isInitial) {
-                setPosts(postsData);
-            } else {
-                setPosts(prev => {
-                    const existingIds = new Set(prev.map((p: any) => p._id));
-                    const newPosts = postsData.filter((p: any) => !existingIds.has(p._id));
-                    return [...prev, ...newPosts];
-                });
-            }
-            setHasMore(data.hasMore || false);
+            setPosts(data.posts || []);
+            setTotalPosts(data.total || data.posts?.length || 0);
         } catch (error) {
             console.error("Error fetching posts:", error);
             setPosts([]);
-            setHasMore(false);
+            setTotalPosts(0);
         } finally {
             setLoading(false);
-            setLoadingMore(false);
         }
     };
 
-    const loadMore = useCallback(() => {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchPosts(nextPage, false);
-    }, [page, type, category, search]);
+    const goToPage = (page: number) => {
+        setCurrentPage(page);
+        fetchPosts(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleTypeChange = (newType: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -121,7 +95,7 @@ export default function FeedContent() {
     const handleCategoryChange = (cat: string) => {
         const params = new URLSearchParams(searchParams.toString());
         if (category === cat) {
-            params.delete("category"); // toggle off
+            params.delete("category");
         } else {
             params.set("category", cat);
         }
@@ -143,7 +117,7 @@ export default function FeedContent() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Discover Items</h1>
-                        {!loading && <p className="text-sm text-[var(--text-secondary)] mt-1">{posts.length} results found</p>}
+                        {!loading && <p className="text-sm text-[var(--text-secondary)] mt-1">{totalPosts} results found</p>}
                     </div>
                     <Link href="/report">
                         <Button className="shadow-lg shadow-[var(--accent)]/20"><Plus size={18} className="mr-2" />New Report</Button>
@@ -187,27 +161,67 @@ export default function FeedContent() {
                     <>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {posts.map((post: any) => (
-                                <PostCard key={post._id} post={post} />
+                                <PostCard
+                                    key={post._id}
+                                    post={post}
+                                    onDelete={() => fetchPosts(currentPage)}
+                                />
                             ))}
                         </div>
 
-                        {/* Infinite Scroll Trigger & Loading Indicator */}
-                        <div ref={observerTarget} className="flex justify-center py-8">
-                            {loadingMore && (
-                                <div className="flex items-center gap-2 text-[var(--accent)]">
-                                    <Loader2 size={20} className="animate-spin" />
-                                    <span className="text-sm">Loading more...</span>
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-2">
+                                <button
+                                    onClick={() => goToPage(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-gray-200"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+
+                                <div className="flex gap-1">
+                                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                        let page;
+                                        if (totalPages <= 7) {
+                                            page = i + 1;
+                                        } else if (currentPage <= 4) {
+                                            page = i + 1;
+                                        } else if (currentPage >= totalPages - 3) {
+                                            page = totalPages - 6 + i;
+                                        } else {
+                                            page = currentPage - 3 + i;
+                                        }
+
+                                        return (
+                                            <button
+                                                key={page}
+                                                onClick={() => goToPage(page)}
+                                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                                                    ? 'bg-blue-600 text-white shadow-md'
+                                                    : 'border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200'
+                                                    }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                            )}
-                            {!hasMore && posts.length > 0 && (
-                                <p className="text-sm text-[var(--text-secondary)]">No more items to load</p>
-                            )}
-                        </div>
+
+                                <button
+                                    onClick={() => goToPage(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-gray-200"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <div className="text-center py-16">
                         <p className="text-6xl mb-4 opacity-20">🔍</p>
-                        <h3 className="text-lg font-bold text-white mb-2">No items found</h3>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No items found</h3>
                         <p className="text-sm text-[var(--text-secondary)]">Try adjusting your filters</p>
                     </div>
                 )}

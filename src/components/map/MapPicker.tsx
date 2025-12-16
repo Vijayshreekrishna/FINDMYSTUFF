@@ -115,16 +115,17 @@ export default function MapPicker({ onLocationSelect, onAddressChange }: MapPick
                 type="button"
                 onClick={handleUseCurrentLocation}
                 disabled={loading}
-                className="premium-button premium-button-ghost w-full flex items-center justify-center gap-2"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors text-gray-900 dark:text-white font-medium"
             >
                 {loading ? (
                     <>
                         <span className="animate-spin">⟳</span>
-                        Detecting location...
+                        <span className="text-gray-900 dark:text-white">Detecting location...</span>
                     </>
                 ) : (
                     <>
-                        📍 Use Current Location
+                        <span>📍</span>
+                        <span className="text-gray-900 dark:text-white">Use Current Location</span>
                     </>
                 )}
             </button>

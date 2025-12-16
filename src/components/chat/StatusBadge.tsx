@@ -3,7 +3,7 @@
 import { CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 
 interface StatusBadgeProps {
-    status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired';
+    status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired' | 'completed';
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
@@ -32,6 +32,11 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
             color: "bg-gray-100 text-gray-700 border-gray-200",
             icon: XCircle,
             label: "Expired"
+        },
+        completed: {
+            color: "bg-emerald-100 text-emerald-700 border-emerald-200",
+            icon: CheckCircle,
+            label: "Completed"
         }
     };
 

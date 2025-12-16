@@ -23,15 +23,27 @@ export default function PostCard({ post, onDelete }: PostProps) {
     const handleDelete = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!confirm("Delete this post?")) return;
+        if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
 
         setIsDeleting(true);
         try {
             const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
-            if (res.ok && onDelete) onDelete();
-        } catch (error) {
-            console.error(error);
-        } finally {
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || 'Failed to delete post');
+            }
+
+            // Success - refresh the feed
+            if (onDelete) {
+                onDelete();
+            }
+
+            // Show success message
+            alert('Post deleted successfully!');
+        } catch (error: any) {
+            console.error('Delete error:', error);
+            alert(error.message || 'Failed to delete post. Please try again.');
             setIsDeleting(false);
         }
     };
@@ -42,13 +54,14 @@ export default function PostCard({ post, onDelete }: PostProps) {
         : { backgroundImage: 'linear-gradient(135deg, #F59E0B 0%, #2E6F40 100%)' };
 
     return (
-        <Card className="group relative overflow-hidden rounded-[30px] border-none shadow-lg hover:shadow-xl transition-all aspect-[16/10] w-full bg-cover bg-center p-0" style={bgStyle}>
+        <Card className="group relative overflow-hidden rounded-[30px] border-none shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 aspect-[16/10] w-full bg-cover bg-center p-0" style={bgStyle}>
             {/* Delete Button (Owner Only) */}
             {isOwner && (
                 <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-[var(--danger)] backdrop-blur-md z-30 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white"
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-red-600 backdrop-blur-md z-50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white"
+                    style={{ pointerEvents: 'auto' }}
                 >
                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </button>

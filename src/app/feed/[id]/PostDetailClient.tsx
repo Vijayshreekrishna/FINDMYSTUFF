@@ -35,20 +35,23 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
     const image = post.images?.[0] || post.image;
 
     const handleDelete = async () => {
-        if (!confirm("Are you sure you want to delete this post?")) return;
+        if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
 
         setIsDeleting(true);
         try {
             const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
-            if (res.ok) {
-                router.push("/feed");
-            } else {
-                alert("Failed to delete post");
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || 'Failed to delete post');
             }
-        } catch (error) {
-            console.error(error);
-            alert("Error deleting post");
-        } finally {
+
+            // Success - show message and redirect
+            alert('Post deleted successfully!');
+            router.push("/feed");
+        } catch (error: any) {
+            console.error('Delete error:', error);
+            alert(error.message || 'Failed to delete post. Please try again.');
             setIsDeleting(false);
         }
     };
