@@ -73,13 +73,13 @@ export default function SuccessStories() {
             z: 0,
             scale: 1,
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 80,
                 damping: 15,
                 duration: 0.8
             }
         }
-    };
+    } as const;
 
     const headerVariants = {
         hidden: { opacity: 0, y: -20 },
@@ -87,11 +87,10 @@ export default function SuccessStories() {
             opacity: 1,
             y: 0,
             transition: {
-                duration: 0.6,
-                ease: "easeOut"
+                duration: 0.6
             }
         }
-    };
+    } as const;
 
     return (
         <section className="relative py-16 overflow-hidden">
