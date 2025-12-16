@@ -1,21 +1,24 @@
 "use client";
 
 import { usePWA } from "@/hooks/usePWA";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Download, Smartphone, Monitor } from "lucide-react";
-import { motion } from "framer-motion";
-
+import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/BottomNav";
 
 export default function PWAEnforcer({ children }: { children: React.ReactNode }) {
-    const { isStandalone, isInstallable, installApp } = usePWA();
+    const { isStandalone } = usePWA();
+    const pathname = usePathname();
 
-    // TEMPORARY: Allow desktop access (just wrapper for now)
+    // Allow install page and auth pages without PWA check
+    const isExemptPage = pathname === '/install' ||
+        pathname.startsWith('/login') ||
+        pathname.startsWith('/register');
+
+    // If not in standalone mode and not on exempt page, PWAGuard will handle redirect
+    // This component just adds the BottomNav for PWA users
     return (
         <>
             {children}
-            <BottomNav />
+            {isStandalone && <BottomNav />}
         </>
     );
 }
