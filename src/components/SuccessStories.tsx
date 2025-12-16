@@ -137,13 +137,6 @@ export default function SuccessStories() {
                         <motion.div
                             key={story.id}
                             variants={cardVariants}
-                            whileHover={{
-                                y: -12,
-                                scale: 1.05,
-                                rotateY: 5,
-                                z: 50,
-                                transition: { duration: 0.3 }
-                            }}
                             style={{
                                 transformStyle: "preserve-3d",
                                 transformPerspective: 1000
