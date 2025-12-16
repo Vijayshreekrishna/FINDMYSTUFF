@@ -84,16 +84,23 @@ export const BottomNav = () => {
             <div className="flex items-center justify-around rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-lg border border-gray-200 dark:border-zinc-700 shadow-xl p-2 px-6">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
+                    const shouldOutline = isOverlappingFooter;
+
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
                             className={`flex flex-col items-center justify-center p-2 rounded-full transition-all ${isActive
-                                ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30"
-                                : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                                    ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30"
+                                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                                 }`}
                         >
-                            <item.icon size={24} className={isActive ? "fill-current" : ""} />
+                            <item.icon
+                                size={24}
+                                className={!shouldOutline && isActive ? "fill-current" : ""}
+                                strokeWidth={shouldOutline ? 1.5 : 2}
+                                fill={shouldOutline ? "none" : undefined}
+                            />
                         </Link>
                     );
                 })}
