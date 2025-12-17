@@ -63,23 +63,23 @@ export default function ProofUploadPanel({ claimId, onSuccess }: ProofUploadPane
 
             <div className="space-y-3">
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Image URL</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Image URL</label>
                     <input
                         type="url"
                         placeholder="https://..."
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
-                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 bg-white"
+                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 bg-white dark:bg-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Note (Optional)</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Note (Optional)</label>
                     <textarea
                         placeholder="Additional details (e.g., serial number, markings)..."
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 bg-white h-20"
+                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2 bg-white dark:bg-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 h-20"
                     />
                 </div>
 
