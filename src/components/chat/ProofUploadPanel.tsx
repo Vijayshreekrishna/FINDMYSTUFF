@@ -88,7 +88,7 @@ export default function ProofUploadPanel({ claimId, onSuccess }: ProofUploadPane
                 <button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="w-full py-2 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
+                    className="w-full py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-xl font-medium text-sm hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
                 >
                     {loading ? "Submitting..." : <>Submit for Review</>}
                 </button>
