@@ -166,7 +166,7 @@ export const ReportForm = () => {
                     padding: 1rem;
                     border-radius: 1rem;
                     background: #e8e8e8;
-                    box-shadow: 10px 10px 30px rgba(197, 197, 197, 0.4), -10px -10px 30px rgba(255, 255, 255, 0.6);
+                    /* box-shadow removed for flat design */
                     transition: all 0.3s ease-in-out;
                     color: #2E2E2E;
                     font-size: 14px;
@@ -175,7 +175,7 @@ export const ReportForm = () => {
                     outline: none;
                     border: 1px solid rgba(63, 94, 251, 0.3);
                     background: #e8e8e8;
-                    box-shadow: inset 8px 8px 20px rgba(197, 197, 197, 0.3), inset -8px -8px 20px rgba(255, 255, 255, 0.5);
+                    /* box-shadow removed for flat design */
                 }
                 .neumorphic-input::placeholder {
                     color: #999;
