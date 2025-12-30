@@ -21,6 +21,6 @@
   - [x] Cleanup Mongoose (`models`, `db.ts`)
   - [x] Verify functionality (Build success)
 
-- [ ] **Deployment**
-  - [ ] Push to GitHub
-  - [ ] Configure Vercel Env Vars
+- [x] **Deployment**
+  - [x] Push to GitHub
+  - [x] Configure Vercel Env Vars (User Notified)
