@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import ChatThread from "@/models/ChatThread";
-import Message from "@/models/Message";
-
+import prisma from "@/lib/prisma";
 
 // Simple polling interval for SSE simulation
 const POLL_INTERVAL_MS = 1000;
@@ -19,11 +16,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const userId = session.user.id;
     const { id } = await params;
 
-    await dbConnect();
-
     // Verify access once
-    const thread = await ChatThread.findById(id);
-    if (!thread || (thread.finder.toString() !== userId && thread.claimant.toString() !== userId)) {
+    const thread = await prisma.chatThread.findUnique({
+        where: { id: id },
+    });
+
+    if (!thread || (thread.finderId !== userId && thread.claimantId !== userId)) {
         return new NextResponse("Forbidden", { status: 403 });
     }
 
@@ -41,15 +39,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
             sendEvent({ type: "connected" });
 
             // Polling loop
-            // Note: Edge functions have limits, so this is a simplified version.
-            // Ideally use a specialized provider or trigger, but for free tier M0/Serverless:
             const interval = setInterval(async () => {
                 try {
                     // Check for messages created after lastCheck
-                    const newMessages = await Message.find()
-                        .where("thread").equals(id)
-                        .where("createdAt").gt(lastCheck as any)
-                        .sort({ createdAt: 1 });
+                    const newMessages = await prisma.message.findMany({
+                        where: {
+                            threadId: id,
+                            createdAt: { gt: lastCheck }
+                        },
+                        orderBy: { createdAt: 'asc' }
+                    });
 
                     if (newMessages.length > 0) {
                         lastCheck = new Date(); // Update watermark
@@ -57,7 +56,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
                     }
                 } catch (e) {
                     console.error("SSE Error", e);
-                    // Don't close stream on transient error
                 }
             }, POLL_INTERVAL_MS);
 

@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import ChatThread from "@/models/ChatThread";
-import Message from "@/models/Message";
+import prisma from "@/lib/prisma";
 import { ratelimit } from "@/lib/ratelimit";
 import { stripLinks } from "@/lib/sanitize";
-import { Types } from "mongoose";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -32,9 +29,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             return NextResponse.json({ error: "Invalid content" }, { status: 400 });
         }
 
-        await dbConnect();
+        const thread = await prisma.chatThread.findUnique({
+            where: { id: id }
+        });
 
-        const thread = await ChatThread.findById(id);
         if (!thread) {
             return NextResponse.json({ error: "Thread not found" }, { status: 404 });
         }
@@ -43,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             return NextResponse.json({ error: "Thread is closed" }, { status: 400 });
         }
 
-        if (thread.finder.toString() !== userId && thread.claimant.toString() !== userId) {
+        if (thread.finderId !== userId && thread.claimantId !== userId) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
@@ -53,12 +51,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             finalContent = stripLinks(content);
         }
 
-        // ... existing imports
+        const message = await prisma.message.create({
+            data: {
+                threadId: id,
+                senderId: userId,
+                content: finalContent,
+            }
+        });
 
-        const message = await Message.create({
-            thread: new Types.ObjectId(id),
-            sender: new Types.ObjectId(userId),
-            content: finalContent,
+        // Update thread updated at
+        await prisma.chatThread.update({
+            where: { id: id },
+            data: { updatedAt: new Date() }
         });
 
         return NextResponse.json(message, { status: 201 });

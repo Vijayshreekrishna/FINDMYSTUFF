@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import Claim from "@/models/Claim";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 
 // Get user's successfully completed claims (GotMyStuff)
 export async function GET() {
     try {
-        await dbConnect();
-
         const session = await getServerSession(authOptions);
         // @ts-ignore
         if (!session?.user?.id) {
@@ -19,34 +15,36 @@ export async function GET() {
         // @ts-ignore
         const userId = session.user.id;
 
-        // Fetch completed claims (after handoff confirmation) where user is the claimant
-        const gotMyStuff = await Claim.find({
-            claimant: userId,
-            status: 'completed'
-        })
-            .populate({
-                path: 'post',
-                select: 'title images type category location createdAt user',
-                populate: {
-                    path: 'user',
-                    select: 'name email'
+        // Fetch completed claims
+        const gotMyStuff = await prisma.claim.findMany({
+            where: {
+                claimantId: userId,
+                status: 'completed'
+            },
+            include: {
+                post: {
+                    include: {
+                        user: {
+                            select: { name: true, email: true }
+                        }
+                    }
                 }
-            })
-            .sort({ updatedAt: -1 })
-            .lean();
+            },
+            orderBy: { updatedAt: 'desc' }
+        });
 
         // Format response
         const formattedClaims = gotMyStuff
-            .filter((claim: any) => claim.post)
-            .map((claim: any) => ({
-                id: claim._id,
+            .filter((claim) => claim.post)
+            .map((claim) => ({
+                id: claim.id,
                 post: {
-                    _id: claim.post._id,
+                    _id: claim.post.id,
                     title: claim.post.title,
                     image: claim.post.images?.[0] || null,
                     type: claim.post.type,
                     category: claim.post.category,
-                    location: claim.post.location?.address || 'Unknown location',
+                    location: claim.post.address || 'Unknown location',
                     finder: claim.post.user?.name || 'Anonymous',
                 },
                 completedAt: claim.updatedAt,

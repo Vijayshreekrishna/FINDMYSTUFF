@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import Claim from "@/models/Claim";
-import ChatThread from "@/models/ChatThread";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -22,33 +19,39 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             return NextResponse.json({ error: "Invalid status" }, { status: 400 });
         }
 
-        await dbConnect();
-        const claim = await Claim.findById(id).populate("post");
+        const claim = await prisma.claim.findUnique({
+            where: { id: id },
+            include: { post: true }
+        });
 
         if (!claim) {
             return NextResponse.json({ error: "Claim not found" }, { status: 404 });
         }
 
         // Only finder can decide
-        // @ts-ignore
-        if (claim.post.user.toString() !== userId) {
+        if (claim.post.userId !== userId) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        claim.status = status;
-        await claim.save();
+        // Update claim status
+        await prisma.claim.update({
+            where: { id: id },
+            data: { status: status }
+        });
 
         // If approved, maybe open link sharing?
         if (status === 'approved') {
-            await ChatThread.findOneAndUpdate()
-                .where("claim").equals(id)
-                .set({ allowLinks: true });
+            await prisma.chatThread.updateMany({
+                where: { claimId: id },
+                data: { allowLinks: true }
+            });
         }
 
         if (status === 'rejected') {
-            await ChatThread.findOneAndUpdate()
-                .where("claim").equals(id)
-                .set({ isClosed: true });
+            await prisma.chatThread.updateMany({
+                where: { claimId: id },
+                data: { isClosed: true }
+            });
         }
 
         return NextResponse.json({ success: true, claim });

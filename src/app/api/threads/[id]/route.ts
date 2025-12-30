@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import ChatThread from "@/models/ChatThread";
-import Message from "@/models/Message";
-
+import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -17,21 +14,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         const userId = session.user.id;
         const { id } = await params;
 
-        await dbConnect();
+        const thread = await prisma.chatThread.findUnique({
+            where: { id: id },
+            include: { claim: true }
+        });
 
-        const thread = await ChatThread.findById(id).populate("claim");
         if (!thread) {
             return NextResponse.json({ error: "Thread not found" }, { status: 404 });
         }
 
         // Verify membership
-        if (thread.finder.toString() !== userId && thread.claimant.toString() !== userId) {
+        if (thread.finderId !== userId && thread.claimantId !== userId) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const messages = await Message.find().where("thread").equals(id)
-            .sort({ createdAt: 1 }) // Oldest first
-            .limit(50);
+        const messages = await prisma.message.findMany({
+            where: { threadId: id },
+            orderBy: { createdAt: 'asc' },
+            take: 50
+        });
 
         return NextResponse.json({ thread, messages });
     } catch (error) {

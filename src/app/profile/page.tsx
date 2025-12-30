@@ -3,19 +3,25 @@ import { ProfileDashboard } from "@/components/ProfileDashboard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 import Link from "next/link";
 import GotMyStuffSection from "@/components/profile/GotMyStuffSection";
 
 async function getUserPosts(userId: string) {
-    await dbConnect();
-    const posts = await Post.find({ user: userId }).sort({ createdAt: -1 }).lean();
+    const posts = await prisma.post.findMany({
+        where: { userId: userId },
+        orderBy: { createdAt: 'desc' }
+    });
+
     return posts.map(post => ({
         ...post,
-        _id: post._id.toString(),
-        location: post.location || {},
-        user: post.user?.toString()
+        _id: post.id,
+        user: post.userId,
+        location: {
+            lat: post.lat,
+            lng: post.lng,
+            address: post.address
+        }
     }));
 }
 

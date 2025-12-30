@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -11,17 +10,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        await dbConnect();
         const data = await req.json();
 
-        console.log("Received post data:", data);
-        console.log("Session user:", session.user);
-
         // @ts-ignore
-        const userId = session.user.id; // Added in session callback
+        const userId = session.user.id;
 
         if (!userId) {
-            console.error("No user ID in session");
             return NextResponse.json({ error: "User ID not found in session" }, { status: 400 });
         }
 
@@ -35,17 +29,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid location data" }, { status: 400 });
         }
 
-        const post = await Post.create({
-            ...data,
-            user: userId,
+        const post = await prisma.post.create({
+            data: {
+                userId: userId,
+                title: data.title,
+                description: data.description,
+                category: data.category,
+                type: data.type,
+                status: 'reported',
+                lat: data.location.lat,
+                lng: data.location.lng,
+                address: data.location.address,
+                images: data.images || [],
+                sensitiveAreas: data.sensitiveAreas || undefined, // Prisma handles optional JSON well usually
+            }
         });
-
-        console.log("Created post:", post);
 
         return NextResponse.json(post, { status: 201 });
     } catch (error: any) {
         console.error("Error creating post:", error);
-        console.error("Error details:", error.message, error.stack);
         return NextResponse.json({
             error: "Internal Server Error",
             details: error.message
@@ -55,7 +57,6 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
     try {
-        await dbConnect();
         const { searchParams } = new URL(req.url);
         const type = searchParams.get("type");
         const category = searchParams.get("category");
@@ -64,41 +65,47 @@ export async function GET(req: NextRequest) {
         const skip = parseInt(searchParams.get("skip") || "0");
         const limit = parseInt(searchParams.get("limit") || "12");
 
-        const query: any = {};
+        const where: any = {};
 
         // Exclude resolved/closed posts from feed
-        query.status = { $nin: ['resolved', 'closed'] };
+        where.status = { notIn: ['resolved', 'closed'] };
 
         // Filter by user
         if (userId) {
-            query.user = userId;
+            where.userId = userId;
         }
 
         // Filter by type (lost/found)
         if (type && type !== "all") {
-            query.type = type;
+            where.type = type;
         }
 
         // Filter by category
         if (category) {
-            query.category = category;
+            where.category = category;
         }
 
         // Search in title and description
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } }
+            where.OR = [
+                { title: { contains: search, mode: "insensitive" } },
+                { description: { contains: search, mode: "insensitive" } }
             ];
         }
 
-        const posts = await Post.find(query)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate("user", "name image email");
+        const posts = await prisma.post.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+            include: {
+                user: {
+                    select: { name: true, image: true, email: true }
+                }
+            }
+        });
 
-        const total = await Post.countDocuments(query);
+        const total = await prisma.post.count({ where });
 
         return NextResponse.json({
             posts,

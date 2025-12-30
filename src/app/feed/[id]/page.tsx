@@ -1,6 +1,4 @@
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
-import "@/models/User"; // Ensure User model is registered for populate
+import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import PostDetailClient from "./PostDetailClient";
 
@@ -8,9 +6,11 @@ import PostDetailClient from "./PostDetailClient";
 export const dynamic = 'force-dynamic';
 
 async function getPost(id: string) {
-    await dbConnect();
     try {
-        const post = await Post.findById(id).populate("user", "name image");
+        const post = await prisma.post.findUnique({
+            where: { id: id },
+            include: { user: { select: { name: true, image: true } } }
+        });
         return post ? JSON.parse(JSON.stringify(post)) : null;
     } catch (error) {
         return null;

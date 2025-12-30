@@ -1,41 +1,44 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import Claim from "@/models/Claim";
-import Post from "@/models/Post";
-import ChatThread from "@/models/ChatThread";
-import dbConnect from "@/lib/db";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
     try {
-        await dbConnect();
-
         const session = await getServerSession(authOptions);
         // @ts-ignore
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Claims I (as owner/claimant) submitted
         // @ts-ignore
-        const claims = await Claim.find({ claimant: session.user.id })
-            .populate({ path: "post", select: "title status images" })
-            .sort({ createdAt: -1 })
-            .lean();
+        const userId = session.user.id;
+
+        // Claims I (as owner/claimant) submitted
+        const claims = await prisma.claim.findMany({
+            where: { claimantId: userId },
+            include: {
+                post: { select: { title: true, status: true, images: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
 
         // Enrich with chatThread ID if exists
-        const claimIds = claims.map((c: any) => c._id);
-        const threads = await ChatThread.find({ claim: { $in: claimIds } }).select("claim _id").lean();
+        const claimIds = claims.map((c) => c.id);
+        const threads = await prisma.chatThread.findMany({
+            where: { claimId: { in: claimIds } },
+            select: { claimId: true, id: true }
+        });
 
         // Create a map of claimId -> threadId
         const threadMap = new Map();
-        threads.forEach((t: any) => {
-            threadMap.set(t.claim.toString(), t._id.toString());
+        threads.forEach((t) => {
+            threadMap.set(t.claimId, t.id);
         });
 
-        const enrichedClaims = claims.map((c: any) => ({
+        const enrichedClaims = claims.map((c) => ({
             ...c,
-            chatThread: threadMap.get(c._id.toString()) || null
+            chatThread: threadMap.get(c.id) || null
         }));
 
         return NextResponse.json(enrichedClaims);

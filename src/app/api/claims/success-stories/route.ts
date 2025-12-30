@@ -1,42 +1,33 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Claim from "@/models/Claim";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 
 // Public endpoint - fetch recent success stories with masked user info
 export async function GET() {
     try {
-        await dbConnect();
-
         // Fetch completed claims (after handoff confirmation) with post details
-        const successfulClaims = await Claim.find({ status: 'completed' })
-            .populate({
-                path: 'post',
-                select: 'title images type category location createdAt',
-                populate: {
-                    path: 'user',
-                    select: 'name' // We'll mask this
-                }
-            })
-            .populate({
-                path: 'claimant',
-                select: 'name' // We'll mask this too
-            })
-            .sort({ updatedAt: -1 })
-            .limit(20)
-            .lean();
+        const successfulClaims = await prisma.claim.findMany({
+            where: { status: 'completed' },
+            take: 20,
+            orderBy: { updatedAt: 'desc' },
+            include: {
+                post: {
+                    include: { user: { select: { name: true } } }
+                },
+                claimant: { select: { name: true } }
+            }
+        });
 
         // Format response with real user names
         const successStories = successfulClaims
-            .filter((claim: any) => claim.post) // Ensure post exists
-            .map((claim: any) => ({
-                id: claim._id,
+            .filter((claim) => claim.post) // Ensure post exists
+            .map((claim) => ({
+                id: claim.id,
                 post: {
                     title: claim.post.title,
                     image: claim.post.images?.[0] || null,
                     type: claim.post.type,
                     category: claim.post.category,
-                    location: claim.post.location?.address || 'Unknown location',
+                    location: claim.post.address || 'Unknown location',
                 },
                 finder: claim.post.user?.name || 'Anonymous',
                 owner: claim.claimant?.name || 'Anonymous',

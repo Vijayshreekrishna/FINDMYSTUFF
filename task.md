@@ -1,0 +1,26 @@
+# Task: Migrate FindMyStuff to Supabase
+
+- [x] **Setup & Configuration**
+  - [x] Analyze project structure and requirements
+  - [x] Create migration plan and guide
+  - [x] Create Prisma schema
+  - [x] Create data migration script
+  - [x] Update `.env.local` with Supabase credentials
+  - [x] Install Prisma and database dependencies
+
+- [x] **Database Migration**
+  - [x] Downgrade to Prisma 6 (Fix validation error)
+  - [x] Push schema to Supabase (`prisma db push`)
+  - [x] Execute data migration script (`node scripts/migrate_data.js`)
+
+- [x] **Codebase Updates**
+  - [x] Update Schema to add `password` field
+  - [x] Update NextAuth Logic (`api/auth`)
+  - [x] Refactor API routes (`api/posts`, `api/threads`, `api/claims`, `api/user`, `api/notifications`)
+  - [x] Refactor Frontend & Cron (`page.tsx`, `feed/[id]`, `profile`, `api/cron`)
+  - [x] Cleanup Mongoose (`models`, `db.ts`)
+  - [x] Verify functionality (Build success)
+
+- [ ] **Deployment**
+  - [ ] Push to GitHub
+  - [ ] Configure Vercel Env Vars

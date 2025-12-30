@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -9,9 +8,11 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        await dbConnect();
         const { id } = await params;
-        const post = await Post.findById(id).populate("user", "name image");
+        const post = await prisma.post.findUnique({
+            where: { id: id },
+            include: { user: { select: { name: true, image: true } } }
+        });
 
         if (!post) {
             return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -35,9 +36,8 @@ export async function DELETE(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        await dbConnect();
         const { id } = await params;
-        const post = await Post.findById(id);
+        const post = await prisma.post.findUnique({ where: { id: id } });
 
         if (!post) {
             return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -45,15 +45,13 @@ export async function DELETE(
 
         // Check ownership
         // @ts-ignore
-        const postUserId = post.user.toString();
-        // @ts-ignore
         const sessionUserId = session.user.id;
 
-        if (postUserId !== sessionUserId) {
+        if (post.userId !== sessionUserId) {
             return NextResponse.json({ error: "Forbidden - You can only delete your own posts" }, { status: 403 });
         }
 
-        await Post.findByIdAndDelete(id);
+        await prisma.post.delete({ where: { id: id } });
 
         return NextResponse.json({ message: "Post deleted successfully" });
     } catch (error) {

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import Claim from "@/models/Claim";
-import ChatThread from "@/models/ChatThread";
-import Message from "@/models/Message";
+import prisma from "@/lib/prisma";
 
 // POST /api/claims/[id]/verify
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -18,8 +15,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
 
     try {
-        await dbConnect();
-
         const { decision, reason } = await req.json();
 
         if (!['approved', 'rejected'].includes(decision)) {
@@ -27,35 +22,45 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
 
         // We need to fetch the claim and populate post to verify the current user is the FINDER (post owner)
-        const claim = await Claim.findById(id).populate("post");
+        const claim = await prisma.claim.findUnique({
+            where: { id: id },
+            include: { post: true }
+        });
+
         if (!claim) {
             return NextResponse.json({ error: "Claim not found" }, { status: 404 });
         }
 
         // @ts-ignore
-        const isFinder = claim.post.user.toString() === userId;
+        const isFinder = claim.post.userId === userId;
         if (!isFinder) {
             return NextResponse.json({ error: "Forbidden: You are not the finder" }, { status: 403 });
         }
 
         // Update Verification
-        claim.verification = {
+        const verificationData = {
             reviewedBy: userId,
             decision,
             decidedAt: new Date(),
             reason
         };
 
+        const updateData: any = {
+            verification: verificationData
+        };
+
         if (decision === 'approved') {
-            claim.status = 'approved';
-            // Chat remains open per user request
+            updateData.status = 'approved';
         } else {
-            claim.status = 'rejected';
+            updateData.status = 'rejected';
         }
 
-        await claim.save();
+        await prisma.claim.update({
+            where: { id: id },
+            data: updateData
+        });
 
-        return NextResponse.json({ success: true, claim });
+        return NextResponse.json({ success: true, claim: { ...claim, ...updateData } });
 
     } catch (error: any) {
         console.error("Verification error:", error);

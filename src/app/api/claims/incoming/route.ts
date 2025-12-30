@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import Claim from "@/models/Claim";
-import Post from "@/models/Post";
+import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
     try {
@@ -15,16 +13,27 @@ export async function GET(req: NextRequest) {
         // @ts-ignore
         const userId = session.user.id;
 
-        await dbConnect();
-
         // Find posts by this user
-        const posts = await Post.find({ user: userId }).select('_id');
-        const postIds = posts.map(p => p._id);
+        const posts = await prisma.post.findMany({
+            where: { userId: userId },
+            select: { id: true }
+        });
+        const postIds = posts.map(p => p.id);
+
+        if (postIds.length === 0) {
+            return NextResponse.json({ claims: [] });
+        }
 
         // Find claims on these posts
-        const claims = await Claim.find({ post: { $in: postIds } })
-            .populate("post", "title description images type")
-            .sort({ createdAt: -1 });
+        const claims = await prisma.claim.findMany({
+            where: { postId: { in: postIds } },
+            include: {
+                post: {
+                    select: { title: true, description: true, images: true, type: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
 
         return NextResponse.json({ claims });
     } catch (error) {

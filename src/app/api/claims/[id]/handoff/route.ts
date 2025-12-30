@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import Claim from "@/models/Claim";
-import Reputation from "@/models/Reputation";
-import { generateHandoffCode, hashHandoffCode, verifyHandoffCode } from "@/lib/handoff";
+import prisma from "@/lib/prisma";
+import { generateHandoffCode, hashHandoffCode } from "@/lib/handoff";
 
 // Generate Code (Finder Only)
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,12 +15,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const userId = session.user.id;
         const { id } = await params;
 
-        await dbConnect();
-        const claim = await Claim.findById(id).populate("post");
+        const claim = await prisma.claim.findUnique({
+            where: { id: id },
+            include: { post: true }
+        });
 
         if (!claim) return NextResponse.json({ error: "Not found" }, { status: 404 });
-        // @ts-ignore
-        if (claim.post.user.toString() !== userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+        if (claim.post.userId !== userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
         // Check if code already exists for this claim
         if (claim.handoffCodeHash) {
@@ -35,8 +35,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const code = generateHandoffCode();
         const hash = await hashHandoffCode(code);
 
-        claim.handoffCodeHash = hash;
-        await claim.save();
+        await prisma.claim.update({
+            where: { id: id },
+            data: { handoffCodeHash: hash }
+        });
 
         // Return plain code to finder so they can share it
         return NextResponse.json({ code });

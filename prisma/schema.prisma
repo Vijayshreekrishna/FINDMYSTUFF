@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- NextAuth Models ---
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?  // Added for Credentials Auth
+  role          String    @default("user")
+  accounts      Account[]
+  sessions      Session[]
+  
+  // App Relations
+  posts         Post[]
+  claims        Claim[]
+  foundThreads  ChatThread[] @relation("FinderThreads")
+  claimThreads  ChatThread[] @relation("ClaimantThreads")
+  messages      Message[]
+  reputation    Reputation?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// --- App Models ---
+model Post {
+  id             String   @id @default(cuid())
+  userId         String
+  title          String
+  description    String
+  category       String
+  type           String
+  status         String   @default("reported")
+  lat            Float
+  lng            Float
+  address        String?
+  images         String[]
+  sensitiveAreas Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  claims         Claim[]
+}
+
+model Claim {
+  id                 String   @id @default(cuid())
+  postId             String
+  claimantId         String
+  status             String   @default("pending")
+  verificationStatus String   @default("unverified")
+  score              Int      @default(0)
+  answers            Json?
+  evidenceImage      String?
+  claimerProof       Json?    // Added missing field
+  handoffCodeHash    String?
+  verificationData   Json?
+  expiresAt          DateTime? // Made optional as it might be calculated or default
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  post               Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  claimant           User     @relation(fields: [claimantId], references: [id], onDelete: Cascade)
+  thread             ChatThread?
+}
+
+model ChatThread {
+  id              String    @id @default(cuid())
+  claimId         String    @unique
+  finderId        String
+  claimantId      String
+  maskedHandleMap Json
+  isClosed        Boolean   @default(false)
+  allowLinks      Boolean   @default(false)
+  allowAttachments Boolean  @default(false)
+  autoCloseAt     DateTime?
+  messages        Message[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  claim           Claim     @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  finder          User      @relation("FinderThreads", fields: [finderId], references: [id])
+  claimant        User      @relation("ClaimantThreads", fields: [claimantId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  senderId  String
+  content   String
+  attachments Json?
+  createdAt DateTime @default(now())
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender    User       @relation(fields: [senderId], references: [id])
+}
+
+model Reputation {
+  userId             String   @id
+  score              Int      @default(100)
+  successfulHandoffs Int      @default(0)
+  rejectedClaims     Int      @default(0)
+  badges             String[]
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

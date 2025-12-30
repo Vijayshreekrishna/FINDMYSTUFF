@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import dbConnect from "@/lib/db";
-import User from "@/models/User";
+import prisma from "@/lib/prisma";
 
 // Update user profile
 export async function PATCH(req: NextRequest) {
@@ -15,9 +14,6 @@ export async function PATCH(req: NextRequest) {
 
         // @ts-ignore
         const userId = session.user.id;
-
-        await dbConnect();
-
         const body = await req.json();
         const { name, image } = body;
 
@@ -27,14 +23,14 @@ export async function PATCH(req: NextRequest) {
         }
 
         // Update user
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            {
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
                 name: name.trim(),
                 ...(image && { image: image.trim() })
             },
-            { new: true, runValidators: true }
-        ).select('name email image');
+            select: { name: true, email: true, image: true }
+        });
 
         if (!updatedUser) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
