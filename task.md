@@ -28,6 +28,7 @@
 
 - [x] **Documentation**
   - [x] Create Master Migration Report (`MIGRATION_REPORT.md`)
+  - [x] Create Project Analysis (`ANALYSIS_REPORT.md`)
 
 - [x] **Bug Fixes**
   - [x] Fix "Post Create" error (Stale session)
@@ -35,3 +36,9 @@
   - [x] Instrumented Debug Logs (Pushed to Vercel)
   - [x] Fix Vercel Build Error (`pgbouncer=true`)
   - [x] Fix Missing "GotMyStuff" Section (Visible Empty State)
+
+- [ ] **Missing Features (Identified in Analysis)**
+  - [ ] **Reputation UI**: Show karma/score on Profile page.
+  - [ ] **Notifications**: Add Notification Bell/Page.
+  - [ ] **Chat Moderation**: Enforce `allowLinks` in `MaskedChat`.
+  - [ ] **Privacy**: Implement `sensitiveAreas` logic in Post Form.
