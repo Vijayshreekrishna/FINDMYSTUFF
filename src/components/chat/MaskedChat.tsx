@@ -89,6 +89,17 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
 
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
+
+        // Link Moderation Check
+        const URL_REGEX = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
+        if (!thread?.allowLinks && URL_REGEX.test(newMessage)) {
+            setNotification({
+                message: "⚠️ Links are disabled in this chat for safety. Please stick to text.",
+                type: 'error'
+            });
+            return;
+        }
+
         const msg = newMessage;
         setNewMessage(""); // Optimistic clear
 

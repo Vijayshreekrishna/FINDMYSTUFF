@@ -34,12 +34,17 @@ export default async function ProfilePage() {
 
     // @ts-ignore
     const userId = session.user.id;
-    const posts = await getUserPosts(userId);
+
+    // Fetch posts and reputation in parallel
+    const [posts, reputation] = await Promise.all([
+        getUserPosts(userId),
+        prisma.reputation.findUnique({ where: { userId } })
+    ]);
 
     return (
         <main className="min-h-screen bg-gray-50 dark:bg-zinc-950 py-8">
             {/* @ts-ignore */}
-            <ProfileDashboard posts={posts} user={session.user} />
+            <ProfileDashboard posts={posts} user={session.user} reputation={reputation} />
 
             {/* GotMyStuff Section */}
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-8">

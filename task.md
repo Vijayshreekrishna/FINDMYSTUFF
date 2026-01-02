@@ -38,7 +38,7 @@
   - [x] Fix Missing "GotMyStuff" Section (Visible Empty State)
 
 - [ ] **Missing Features (Identified in Analysis)**
-  - [ ] **Reputation UI**: Show karma/score on Profile page.
+  - [x] **Reputation UI**: Show karma/score on Profile page.
   - [ ] **Notifications**: Add Notification Bell/Page.
-  - [ ] **Chat Moderation**: Enforce `allowLinks` in `MaskedChat`.
+  - [x] **Chat Moderation**: Enforce `allowLinks` in `MaskedChat`.
   - [ ] **Privacy**: Implement `sensitiveAreas` logic in Post Form.

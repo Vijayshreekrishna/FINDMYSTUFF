@@ -19,9 +19,14 @@ const EmptyState = ({ title, action }: { title: string; action?: string }) => (
 interface ProfileDashboardProps {
     posts: any[];
     user: any;
+    reputation?: {
+        score: number;
+        successfulHandoffs: number;
+        badges: string[];
+    } | null;
 }
 
-export const ProfileDashboard = ({ posts, user }: ProfileDashboardProps) => {
+export const ProfileDashboard = ({ posts, user, reputation }: ProfileDashboardProps) => {
     const [alertsEnabled, setAlertsEnabled] = useState(true);
     const [claims, setClaims] = useState<any[]>([]);
     const [loadingClaims, setLoadingClaims] = useState(true);
@@ -118,8 +123,8 @@ export const ProfileDashboard = ({ posts, user }: ProfileDashboardProps) => {
                                                     key={page}
                                                     onClick={() => goToPage(page)}
                                                     className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'border border-gray-300 dark:border-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200'
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'border border-gray-300 dark:border-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-200'
                                                         }`}
                                                 >
                                                     {page}
@@ -143,6 +148,43 @@ export const ProfileDashboard = ({ posts, user }: ProfileDashboardProps) => {
                     </div>
                 </div>
                 <aside className="space-y-4">
+                    {/* Reputation / Trust Score Card */}
+                    <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-bl-full -mr-4 -mt-4" />
+
+                        <h4 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            🛡️ Trust Score
+                        </h4>
+
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="flex-1 text-center p-2 rounded-xl bg-gray-50 dark:bg-zinc-700/50">
+                                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {reputation?.score || 0}
+                                </div>
+                                <div className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Karma</div>
+                            </div>
+                            <div className="flex-1 text-center p-2 rounded-xl bg-gray-50 dark:bg-zinc-700/50">
+                                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                    {reputation?.successfulHandoffs || 0}
+                                </div>
+                                <div className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Returns</div>
+                            </div>
+                        </div>
+
+                        {reputation?.badges && reputation.badges.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                                {reputation.badges.map(badge => (
+                                    <span key={badge} className="px-2 py-1 rounded-md bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-500 text-xs font-medium border border-yellow-200 dark:border-yellow-900">
+                                        {badge}
+                                    </span>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-xs text-gray-500 italic text-center">
+                                Complete a handoff to earn badges!
+                            </p>
+                        )}
+                    </div>
                     <div className="rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 shadow-sm">
                         <h4 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Messages</h4>
                         {loadingClaims ? (
