@@ -59,7 +59,7 @@ A custom Node.js script was developed to transfer data without data loss.
     *   Created `lib/prisma.ts` (Prisma Client Singleton).
 
 2.  **Authentication (`api/auth/[...nextauth]`)**:
-    *   Switched to `@auth/prisma-adapter`.
+    *   Switched to `@next-auth/prisma-adapter` (Compatible with NextAuth v4).
     *   Updated `User` schema to support both OAuth (Google) and Credentials login.
 
 3.  **API Routes**:
