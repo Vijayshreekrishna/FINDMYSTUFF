@@ -195,7 +195,7 @@ export const ProfileDashboard = ({ posts, user, reputation }: ProfileDashboardPr
                             <div className="space-y-2">
                                 {claims.map((claim: any) => (
                                     <Link
-                                        key={claim._id}
+                                        key={claim.id || claim._id}
                                         href={`/profile/claims`}
                                         className="block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors border border-gray-200 dark:border-zinc-600"
                                     >

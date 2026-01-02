@@ -24,12 +24,15 @@ export default function ReviewPanel({ claimId, proof, onDecision }: ReviewPanelP
                 body: JSON.stringify({ decision, reason: `Manually ${decision} by finder.` }),
             });
 
-            if (!res.ok) throw new Error("Failed");
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || "Failed");
+            }
 
             if (onDecision) onDecision();
             router.refresh();
-        } catch (e) {
-            alert("Action failed. Try again.");
+        } catch (e: any) {
+            alert(`Action failed: ${e.message}`);
         } finally {
             setStatus('idle');
         }

@@ -13,15 +13,20 @@ async function getPost(id: string) {
         });
         return post ? JSON.parse(JSON.stringify(post)) : null;
     } catch (error) {
+        console.error(`[ERROR] getPost failed for ID ${id}:`, error);
         return null;
     }
 }
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    console.log(`[DEBUG] Rendering PostPage for ID: ${id}`);
+
     const post = await getPost(id);
+    console.log(`[DEBUG] getPost result:`, post ? "Found" : "Not Found");
 
     if (!post) {
+        console.error(`[ERROR] Post not found for ID: ${id}`);
         notFound();
     }
 

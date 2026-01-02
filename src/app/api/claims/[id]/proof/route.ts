@@ -16,9 +16,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
 
     try {
-        const { imageUrl, note } = await req.json();
+        const body = await req.json();
+        console.log("[DEBUG] POST /api/claims/[id]/proof - Body:", body);
+        const { imageUrl, note } = body;
 
         if (!imageUrl) {
+            console.error("[DEBUG] Missing imageUrl");
             return NextResponse.json({ error: "Image URL is required" }, { status: 400 });
         }
 

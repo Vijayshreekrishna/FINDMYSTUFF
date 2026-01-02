@@ -82,7 +82,7 @@ export default function UnifiedClaimsPage() {
                     ) : (
                         <ul className="grid md:grid-cols-2 gap-4">
                             {myClaims.map((c) => (
-                                <li key={c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
+                                <li key={c.id || c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
                                     <div className="flex items-start justify-between mb-3">
                                         <h3 className="font-semibold text-lg text-gray-900 line-clamp-1">{c.post?.title ?? "Item"}</h3>
                                         <StatusBadge status={c.status} />
@@ -130,7 +130,7 @@ export default function UnifiedClaimsPage() {
                                         {receivedClaims
                                             .filter((c: any) => c.status !== 'approved')
                                             .map((c) => (
-                                                <li key={c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
+                                                <li key={c.id || c._id} className="border border-gray-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all">
                                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between md:justify-start gap-4 mb-2">
@@ -167,7 +167,7 @@ export default function UnifiedClaimsPage() {
                                         {receivedClaims
                                             .filter((c: any) => c.status === 'approved')
                                             .map((c) => (
-                                                <li key={c._id} className="border border-green-200 bg-green-50 rounded-2xl p-5 shadow-sm">
+                                                <li key={c.id || c._id} className="border border-green-200 bg-green-50 rounded-2xl p-5 shadow-sm">
                                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between md:justify-start gap-4 mb-2">

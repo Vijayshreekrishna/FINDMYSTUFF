@@ -27,7 +27,8 @@ export default function PostCard({ post, onDelete }: PostProps) {
 
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
+            const postId = post.id || post._id;
+            const res = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
 
             if (!res.ok) {
                 const error = await res.json();
@@ -67,7 +68,8 @@ export default function PostCard({ post, onDelete }: PostProps) {
                 </button>
             )}
 
-            <Link href={`/feed/${post._id}`} className="absolute inset-0 block z-10">
+            {/* Link to Detail Page */}
+            <Link href={`/feed/${post.id || post._id}`} className="absolute inset-0 block z-10">
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300" />
 

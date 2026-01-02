@@ -36,7 +36,12 @@
   - [x] Instrumented Debug Logs (Pushed to Vercel)
   - [x] Fix Vercel Build Error (`pgbouncer=true`)
   - [x] Fix Missing "GotMyStuff" Section (Visible Empty State)
+  - [x] Fix Missing "GotMyStuff" Section (Visible Empty State)
   - [x] Fix Migrated User Login (Enable Account Linking)
+  - [x] Fix "Invalid Input" on Claim (Updated Post ID)
+  - [x] Fix "Internal Error" on Claim (Stale Session - User Relogged)
+  - [x] Fix Chat Permissions (Finder ID Mismatch)
+  - [x] Fix Approval Action (Corrected Field Name & ID)
 
 - [ ] **Missing Features (Identified in Analysis)**
   - [x] **Reputation UI**: Show karma/score on Profile page.

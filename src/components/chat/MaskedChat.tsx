@@ -19,7 +19,7 @@ interface Thread {
     maskedHandleMap: Record<string, string>;
     allowLinks: boolean;
     isClosed: boolean;
-    finder: string;
+    finderId: string;
     claim: {
         _id: string;
         status: 'pending' | 'awaiting_verification' | 'approved' | 'rejected' | 'expired' | 'completed';
@@ -103,16 +103,24 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
         const msg = newMessage;
         setNewMessage(""); // Optimistic clear
 
-        await fetch(`/api/threads/${threadId}/messages`, {
-            method: 'POST',
-            body: JSON.stringify({ content: msg })
-        });
+        try {
+            const res = await fetch(`/api/threads/${threadId}/messages`, {
+                method: 'POST',
+                body: JSON.stringify({ content: msg })
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                setNotification({ message: err.error || "Failed to send", type: 'error' });
+            }
+        } catch (e) {
+            setNotification({ message: "Network error", type: 'error' });
+        }
         // We rely on SSE to append it to list, or we can append optimistically here
     };
 
     const handleHandoffGenerate = async () => {
         if (!thread) return;
-        const claimId = thread.claim._id;
+        const claimId = (thread.claim as any).id || thread.claim._id;
         const res = await fetch(`/api/claims/${claimId}/handoff`, { method: 'POST' });
         const data = await res.json();
 
@@ -129,7 +137,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const handleHandoffConfirm = async () => {
         if (!thread) return;
         if (!handoffCode) return;
-        const claimId = thread.claim._id;
+        const claimId = (thread.claim as any).id || thread.claim._id;
         const res = await fetch(`/api/claims/${claimId}/handoff/confirm`, {
             method: 'POST',
             headers: {
@@ -150,7 +158,8 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
 
     const myHandle = thread.maskedHandleMap[currentUserId] || "Me";
     const otherHandle = Object.values(thread.maskedHandleMap).find(h => h !== myHandle) || "User";
-    const isFinder = thread.finder === currentUserId;
+    const isFinder = thread.finderId === currentUserId;
+    console.log("[DEBUG] Chat Role Check:", { isFinder, currentUserId, threadFinder: thread.finder });
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] relative">
@@ -213,7 +222,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                     {messages.map(msg => {
                         const isMe = msg.sender === currentUserId;
                         return (
-                            <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <div key={msg.id || msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[75%] p-3 rounded-2xl px-4 ${isMe
                                     ? 'bg-blue-600 text-white rounded-br-sm'
                                     : 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-bl-sm shadow-sm'
@@ -260,7 +269,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
                 {/* 1. Verification Logic */}
                 {!isFinder && (thread.claim.status === 'pending' || thread.claim.status === 'awaiting_verification') && (
                     <ProofUploadPanel
-                        claimId={thread.claim._id}
+                        claimId={(thread.claim as any).id || thread.claim._id}
                         onSuccess={() => {
                             refreshThread();
                             setNotification({ message: "Proof submitted successfully!", type: 'success' });
@@ -270,7 +279,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
 
                 {isFinder && thread.claim.status === 'awaiting_verification' && thread.claim.claimerProof && (
                     <ReviewPanel
-                        claimId={thread.claim._id}
+                        claimId={(thread.claim as any).id || thread.claim._id}
                         proof={thread.claim.claimerProof}
                         onDecision={() => {
                             refreshThread();

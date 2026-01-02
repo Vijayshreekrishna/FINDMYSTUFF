@@ -256,7 +256,7 @@ export default function MapPreview({ items }: MapPreviewProps) {
                                                         <p className="text-xs text-gray-500">{item.location.address}</p>
                                                     )}
                                                     <a
-                                                        href={`/feed/${item._id}`}
+                                                        href={`/feed/${item.id}`}
                                                         className="mt-2 inline-block text-xs text-blue-600 hover:underline"
                                                     >
                                                         View Details →

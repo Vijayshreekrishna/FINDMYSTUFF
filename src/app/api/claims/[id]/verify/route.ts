@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 // POST /api/claims/[id]/verify
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -15,7 +16,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
 
     try {
-        const { decision, reason } = await req.json();
+        const body = await req.json();
+        console.log("[DEBUG] POST /api/claims/[id]/verify - Body:", body);
+        const { decision, reason } = body;
 
         if (!['approved', 'rejected'].includes(decision)) {
             return NextResponse.json({ error: "Invalid decision" }, { status: 400 });
@@ -33,6 +36,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         // @ts-ignore
         const isFinder = claim.post.userId === userId;
+        console.log("[DEBUG] Verify Permission Check:", { isFinder, postOwner: claim.post.userId, currentUserId: userId });
+
         if (!isFinder) {
             return NextResponse.json({ error: "Forbidden: You are not the finder" }, { status: 403 });
         }
@@ -45,8 +50,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             reason
         };
 
+        // Explicit cast for Prisma JSON compatibility
+        const jsonVerification = verificationData as unknown as Prisma.InputJsonValue;
+
         const updateData: any = {
-            verification: verificationData
+            verificationData: jsonVerification
         };
 
         if (decision === 'approved') {

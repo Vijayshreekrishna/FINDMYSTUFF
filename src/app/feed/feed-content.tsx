@@ -162,7 +162,7 @@ export default function FeedContent() {
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {posts.map((post: any) => (
                                 <PostCard
-                                    key={post._id}
+                                    key={post.id || post._id}
                                     post={post}
                                     onDelete={() => fetchPosts(currentPage)}
                                 />

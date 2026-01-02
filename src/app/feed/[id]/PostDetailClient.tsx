@@ -20,7 +20,7 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
 
     // @ts-ignore
     const sessionUserId = session?.user?.id?.toString();
-    const postUserId = post.user?._id?.toString() || post.user?.toString();
+    const postUserId = post.user?.id || (post.user as any)?._id?.toString() || (post.user as any)?.toString();
     const isOwner = sessionUserId && postUserId && sessionUserId === postUserId;
     // Basic logic: You claim items that are "Found" (because you lost them)
     // Or you can claim a "Lost" item saying "I found it"?
@@ -39,7 +39,7 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
 
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
+            const res = await fetch(`/api/posts/${post.id}`, { method: "DELETE" });
 
             if (!res.ok) {
                 const error = await res.json();
@@ -183,7 +183,7 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                             <div className="w-full max-w-lg">
                                 <ClaimForm
-                                    postId={post._id}
+                                    postId={post.id}
                                     onCancel={() => setShowClaimForm(false)}
                                     onSuccess={(claimId) => {
                                         setShowClaimForm(false);
