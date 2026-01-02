@@ -22,6 +22,7 @@ interface MapItem {
     _id?: string;
     title: string;
     description: string;
+    category: string;
     type: string;
     location: {
         lat: number;
