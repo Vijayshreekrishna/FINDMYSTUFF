@@ -8,7 +8,8 @@ import ReviewPanel from "./ReviewPanel";
 import StatusBadge from "./StatusBadge";
 
 interface Message {
-    _id: string;
+    id: string;
+    _id?: string;
     sender: string;
     content: string;
     createdAt: string;
