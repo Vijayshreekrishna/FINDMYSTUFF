@@ -105,7 +105,8 @@ Use the provided `deployment.md` for a checklist of these variables.
 ## 5. Maintenance & Troubleshooting
 
 *   **Type Errors**: If you change the schema, remember to run `npx prisma generate` to update the TypeScript definitions.
-*   **Connection Issues**: Ensure you are using the **Transaction Pooler** (port 6543 or 5432 on pooler domain) for serverless environments like Vercel. Direct connection (port 5432) may exhaust connections.
+*   **Connection Issues**: Ensure you are using the **Transaction Pooler** (port 6543).
+    *   **Critical**: You MUST append `?pgbouncer=true` to your `DATABASE_URL` to avoid the `prepared statement "s0" already exists` error.
 
 ---
 *End of Report*

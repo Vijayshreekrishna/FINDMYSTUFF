@@ -32,3 +32,5 @@
 - [x] **Bug Fixes**
   - [x] Fix "Post Create" error (Stale session)
   - [x] Fix Google Login (Fixed Adapter Version)
+  - [x] Instrumented Debug Logs (Pushed to Vercel)
+  - [x] Fix Vercel Build Error (`pgbouncer=true`)

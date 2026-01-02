@@ -8,7 +8,7 @@ Go to your Vercel Dashboard -> Project -> Settings -> Environment Variables and 
 
 | Variable | Description |
 |---|---|
-| `DATABASE_URL` | Your Supabase **Transaction Pooler** URL (port 6543/5432). |
+| `DATABASE_URL` | Your Supabase **Transaction Pooler** URL. **IMPORTANT**: Append `?pgbouncer=true` to the end of the URL. |
 | `NEXTAUTH_SECRET` | A random string for auth encryption. |
 | `NEXTAUTH_URL` | Your Vercel domain (e.g. `https://your-app.vercel.app`). Auto-set by Vercel usually, but good to explicit. |
 | `GOOGLE_ID` | Google OAuth Client ID. |
