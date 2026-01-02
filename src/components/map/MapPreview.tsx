@@ -18,10 +18,11 @@ L.Icon.Default.mergeOptions({
 });
 
 interface MapItem {
-    _id: string;
+    id: string;
+    _id?: string;
     title: string;
-    type: "lost" | "found";
-    category: string;
+    description: string;
+    type: string;
     location: {
         lat: number;
         lng: number;
