@@ -42,9 +42,10 @@ export default function SuccessStories() {
         }
     };
 
-    if (loading || stories.length === 0) {
-        return null; // Don't show section if no stories
+    if (loading) {
+        return <div className="py-16 text-center text-gray-500">Loading stories...</div>;
     }
+    // Removed early return for empty stories to ensure section is visible
 
     // Animation variants
     const containerVariants = {
@@ -125,86 +126,98 @@ export default function SuccessStories() {
                 </motion.div>
 
                 {/* Stories Grid */}
-                <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-                    style={{ perspective: "1000px" }}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-50px" }}
-                    variants={containerVariants}
-                >
-                    {stories.map((story) => (
-                        <motion.div
-                            key={story.id}
-                            variants={cardVariants}
-                            style={{
-                                transformStyle: "preserve-3d",
-                                transformPerspective: 1000
-                            }}
-                            className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
-                        >
-                            {/* Image */}
-                            <div className="relative h-48 bg-gray-100 dark:bg-zinc-700 overflow-hidden">
-                                {story.post.image ? (
-                                    <img
-                                        src={story.post.image}
-                                        alt={story.post.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <Package className="text-gray-400 dark:text-gray-500" size={48} />
-                                    </div>
-                                )}
+                {stories.length > 0 ? (
+                    <motion.div
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                        style={{ perspective: "1000px" }}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-50px" }}
+                        variants={containerVariants}
+                    >
+                        {stories.map((story) => (
+                            <motion.div
+                                key={story.id}
+                                variants={cardVariants}
+                                style={{
+                                    transformStyle: "preserve-3d",
+                                    transformPerspective: 1000
+                                }}
+                                className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
+                            >
+                                {/* Image */}
+                                <div className="relative h-48 bg-gray-100 dark:bg-zinc-700 overflow-hidden">
+                                    {story.post.image ? (
+                                        <img
+                                            src={story.post.image}
+                                            alt={story.post.title}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <Package className="text-gray-400 dark:text-gray-500" size={48} />
+                                        </div>
+                                    )}
 
-                                {/* Success Badge */}
-                                <motion.div
-                                    className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg"
-                                    initial={{ scale: 0, rotate: -180 }}
-                                    whileInView={{ scale: 1, rotate: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{
-                                        delay: 0.3,
-                                        type: "spring",
-                                        stiffness: 200,
-                                        damping: 10
-                                    }}
-                                >
-                                    <Sparkles size={12} />
-                                    Returned
-                                </motion.div>
-                            </div>
-
-                            {/* Content */}
-                            <div className="p-4">
-                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                                    {story.post.title}
-                                </h3>
-
-                                <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400 mb-3">
-                                    <div className="flex items-center gap-1">
-                                        <Package size={12} />
-                                        <span className="capitalize">{story.post.type} • {story.post.category}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-1">
-                                        <Calendar size={12} />
-                                        <span>{format(new Date(story.completedAt), 'MMM d, yyyy')}</span>
-                                    </div>
+                                    {/* Success Badge */}
+                                    <motion.div
+                                        className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg"
+                                        initial={{ scale: 0, rotate: -180 }}
+                                        whileInView={{ scale: 1, rotate: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{
+                                            delay: 0.3,
+                                            type: "spring",
+                                            stiffness: 200,
+                                            damping: 10
+                                        }}
+                                    >
+                                        <Sparkles size={12} />
+                                        Returned
+                                    </motion.div>
                                 </div>
 
-                                {/* User Info (Masked) */}
-                                <div className="pt-3 border-t border-gray-100 dark:border-zinc-700">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                                        <span className="font-medium text-green-600 dark:text-green-400">{story.finder}</span>
-                                        {' → '}
-                                        <span className="font-medium text-blue-600 dark:text-blue-400">{story.owner}</span>
-                                    </p>
+                                {/* Content */}
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                                        {story.post.title}
+                                    </h3>
+
+                                    <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                                        <div className="flex items-center gap-1">
+                                            <Package size={12} />
+                                            <span className="capitalize">{story.post.type} • {story.post.category}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-1">
+                                            <Calendar size={12} />
+                                            <span>{format(new Date(story.completedAt), 'MMM d, yyyy')}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* User Info (Masked) */}
+                                    <div className="pt-3 border-t border-gray-100 dark:border-zinc-700">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                                            <span className="font-medium text-green-600 dark:text-green-400">{story.finder}</span>
+                                            {' → '}
+                                            <span className="font-medium text-blue-600 dark:text-blue-400">{story.owner}</span>
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center py-12 bg-white/50 dark:bg-zinc-800/50 rounded-2xl border border-dashed border-gray-300 dark:border-zinc-700"
+                    >
+                        <Sparkles className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">No Success Stories Yet</h3>
+                        <p className="text-gray-500 dark:text-gray-400">Be the first to find and return an item!</p>
+                    </motion.div>
+                )}
 
                 {/* Footer Message */}
                 {stories.length > 0 && (
