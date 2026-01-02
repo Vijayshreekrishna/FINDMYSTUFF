@@ -51,16 +51,19 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async session({ session, token }) {
+            console.log("Session Callback - Token:", token);
             if (session.user) {
                 // @ts-ignore
-                session.user.id = token.sub; // Prisma Adapter uses 'sub' as ID in JWT
+                session.user.id = token.sub || token.id; // Fallback to token.id if sub is missing
                 // @ts-ignore
                 session.user.role = token.role;
             }
+            console.log("Session Callback - Final Session:", session);
             return session;
         },
         async jwt({ token, user }) {
             if (user) {
+                console.log("JWT Callback - User Login:", user);
                 token.id = user.id;
                 // @ts-ignore
                 token.role = user.role;

@@ -21,13 +21,17 @@ export async function POST(req: NextRequest) {
 
         // Validate required fields
         if (!data.title || !data.description || !data.category || !data.type) {
+            console.error("Missing required fields:", data);
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
         // Ensure location has required fields
         if (!data.location || typeof data.location.lat !== 'number' || typeof data.location.lng !== 'number') {
+            console.error("Invalid location data:", data.location);
             return NextResponse.json({ error: "Invalid location data" }, { status: 400 });
         }
+
+        console.log("Creating Post - User:", userId, "Data:", data);
 
         const post = await prisma.post.create({
             data: {
