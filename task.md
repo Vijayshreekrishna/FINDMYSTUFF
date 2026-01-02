@@ -36,6 +36,7 @@
   - [x] Instrumented Debug Logs (Pushed to Vercel)
   - [x] Fix Vercel Build Error (`pgbouncer=true`)
   - [x] Fix Missing "GotMyStuff" Section (Visible Empty State)
+  - [x] Fix Migrated User Login (Enable Account Linking)
 
 - [ ] **Missing Features (Identified in Analysis)**
   - [x] **Reputation UI**: Show karma/score on Profile page.
