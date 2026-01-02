@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -28,24 +28,17 @@ export const authOptions: NextAuthOptions = {
                         where: { email: credentials.email }
                     });
 
-                    // Prisma might return user without password if it's OAuth only, 
-                    // but our schema doesn't have password field yet? 
-                    // Wait, the schema uses 'Account' for OAuth, but for Credentials 
-                    // we need a password field in User or separate table.
-                    // The Migration Script migrated roles/images.
-                    // If using Credentials, we likely need a 'password' field in User model 
-                    // or handle it manually.
-                    // Assuming User model has 'password' mapped if defined 
-                    // (Actually checked schema.prisma -> User doesn't have password field!)
-                    // This is a common issue. I will add it to the schema in next step if missing 
-                    // or assume this functionality needs update.
+                    if (!user || !user.password) {
+                        throw new Error("Invalid credentials");
+                    }
 
-                    // For now, let's assume strict OAuth or handle basic check
-                    // The previous code had `user.password`. 
-                    // The Prisma Schema I wrote missed `password` field in `User`.
-                    // I MUST UPDATE SCHEMA FIRST if Credentials login is required.
+                    const isValid = await bcrypt.compare(credentials.password, user.password);
 
-                    return null; // Placeholder until Schema fix
+                    if (!isValid) {
+                        throw new Error("Invalid credentials");
+                    }
+
+                    return user;
                 } catch (error) {
                     console.error("Auth error:", error);
                     return null;
