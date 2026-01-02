@@ -159,7 +159,7 @@ export default function MaskedChat({ threadId, currentUserId }: { threadId: stri
     const myHandle = thread.maskedHandleMap[currentUserId] || "Me";
     const otherHandle = Object.values(thread.maskedHandleMap).find(h => h !== myHandle) || "User";
     const isFinder = thread.finderId === currentUserId;
-    console.log("[DEBUG] Chat Role Check:", { isFinder, currentUserId, threadFinder: thread.finder });
+    console.log("[DEBUG] Chat Role Check:", { isFinder, currentUserId, threadFinder: thread.finderId });
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] relative">
