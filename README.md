@@ -158,7 +158,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## ✍️ Author
 
 <div align="center">
-  <strong><a href="https://github.com/Vijayshreekrishna">@Vijayshreekrishna</a></strong>
+  <strong><a href="https://github.com/Vijayshreekrishna">Vijayshreekrishna</a></strong>
 </div>
 
 <div align="center">
@@ -171,7 +171,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <small>Guided by <strong><a href="https://github.com/Ayushjain2205">@Ayushjain2205</a></strong></small>
+  <small>Guided by <strong><a href="https://github.com/Ayushjain2205">Ayushjain2205</a></strong></small>
   <br />
   <img src="public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" style="margin-top: 10px;" />
   <br />
