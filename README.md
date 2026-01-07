@@ -158,13 +158,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## ✍️ Author
 
 <div align="center">
-  <img src="./public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" />
+  <strong>Vijayshreekrishna</strong>
   <br />
-  <strong>Entropy Labs</strong>
+  <img src="./public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" />
 </div>
 
 - [GitHub Profile](https://github.com/Vijayshreekrishna)
 - [LinkedIn](https://linkedin.com/in/vijayshreekrishna)
-- [Twitter](https://twitter.com/EntropyLabs)
 
 ---
