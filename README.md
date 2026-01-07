@@ -7,9 +7,7 @@
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
 <div align="center">
-  <a href="https://github.com/Vijayshreekrishna/FINDMYSTUFF/raw/main/public/preview.mp4">
-    <strong>🎥 Watch Preview Video</strong>
-  </a>
+  <img src="public/xyx.gif" width="100%" alt="FindMyStuff Preview" />
 </div>
 
 ---
