@@ -162,8 +162,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 </div>
 
 <div align="center">
-  <br />
-  <a href="https://github.com/Vijayshreekrishna">GitHub</a> • 
+  <br /> 
   <a href="https://linkedin.com/in/vijayshreekrishna">LinkedIn</a>
   <br />
 </div>
@@ -173,7 +172,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <div align="center">
   <small>Guided by <strong><a href="https://github.com/Ayushjain2205">Ayushjain2205</a></strong></small>
   <br />
-  <img src="public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" style="margin-top: 10px;" />
+  <img src="https://github.com/Vijayshreekrishna/FINDMYSTUFF/blob/main/public/entropy-logo.svg?raw=true" alt="Entropy Labs" width="50" height="50" style="margin-top: 10px;" />
   <br />
-  <strong>Entropy Labs</strong>
 </div>
