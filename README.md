@@ -1,75 +1,174 @@
-# FindMyStuff - Lost & Found PWA
+# 🕵️ FindMyStuff
+> *The Premium Lost & Found Solution for the Modern Web.*
 
-A premium Progressive Web App for reporting and finding lost items. Built with Next.js 14, MongoDB, and NextAuth.
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-active-success.svg?style=for-the-badge)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
-## Features
+<div align="center">
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjR5eXF4eHR5eXF4eHR5eXF4eHR5eXF4eHR5eXF4eHR5eXF4eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjeiVyM/giphy.gif" width="100%" height="auto" alt="FindMyStuff Demo" />
+</div>
 
-- 📍 Report lost and found items with location
-- 🗺️ Interactive maps using Leaflet
-- 🔐 Secure Google OAuth authentication
-- 📱 Progressive Web App (installable)
-- 🖼️ Image uploads via Cloudinary
-- 🔍 Real-time search and filtering
-- 📊 Responsive design for all devices
+---
 
-## Tech Stack
+## 📖 Overview
 
-- **Framework:** Next.js 16.0.3
-- **Database:** MongoDB with Mongoose
-- **Authentication:** NextAuth with Google OAuth
-- **Maps:** Leaflet / React-Leaflet
-- **Image Upload:** Cloudinary
-- **Styling:** Tailwind CSS
-- **Deployment:** Vercel
+**FindMyStuff** is a next-generation **Progressive Web App (PWA)** designed to bridge the gap between lost items and their owners. Built with privacy and ease-of-use at its core, it leverages geolocation, AI-enhanced matching, and a secure verification system to ensure items are returned safely.
 
-## Getting Started
+Whether you've lost a wallet in a cafe or found a set of keys in the park, **FindMyStuff** provides the tools to connect, verify, and resolve.
+
+---
+
+## ✨ Key Features
+
+### 🔍 For Finders & Owners
+- **📍 Geolocation Mapping**: Interactive Leaflet maps to pinpoint exactly where items were lost or found.
+- **📸 Smart Reporting**: Upload images via `Cloudinary` with sensitive area masking to protect privacy.
+- **🛡️ Claim System**: A robust claim verification process. Finders can review claims with detailed questionnaires and evidence scoring.
+- **💬 Masked Chat**: Privacy-first communication. Chat with the other party without revealing your personal phone number or email, powered by **Server-Sent Events (SSE)**.
+
+### 🔐 Security & Trust
+- **🤖 Bot Protection**: Integrated **Cloudflare Turnstile** to prevent spam and fake reports.
+- **🚦 Rate Limiting**: Advanced API protection using **Upstash Redis** to prevent abuse.
+- **✅ Reputation System**: Users earn badges and trust scores for successful handoffs.
+- **🔑 Secure Auth**: Powered by **NextAuth.js** (Google OAuth + Credentials).
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology | Description |
+| :--- | :--- | :--- |
+| **Framework** | ![Next JS](https://img.shields.io/badge/Next-black?style=flat-square&logo=next.js&logoColor=white) | **Next.js 14** (App Router) |
+| **Language** | ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) | Type-safe development |
+| **Database** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white) | **Supabase** (Migrated from Mongo) |
+| **Styling** | ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) | Modern utility-first CSS |
+| **Maps** | ![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white) | Interactive Maps |
+| **Rate Limit** | ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=flat-square&logo=redis&logoColor=white) | **Upstash** Cloud Redis |
+| **Images** | ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white) | Image Management |
+
+---
+
+## 📂 Project Structure
+
+```bash
+📦 src
+ ┣ 📂 app
+ ┃ ┣ 📂 api            # ⚡ Backend API Routes (Claims, Auth, Chat)
+ ┃ ┣ 📂 (auth)         # 🔐 Authentication Pages
+ ┃ ┣ 📂 dashboard      # 📊 User Dashboard
+ ┃ ┗ 📂 feed           # 📰 Lost & Found Feed
+ ┣ 📂 components
+ ┃ ┣ 📂 chat           # 💬 Masked Chat UI
+ ┃ ┣ 📂 map            # 🗺️ Map Visualizations
+ ┃ ┗ 📂 shared         # 🧩 Reusable UI Components
+ ┣ 📂 lib
+ ┃ ┣ 📜 claimScore.ts  # 🧠 Matching Algorithm
+ ┃ ┗ 📜 ratelimit.ts   # 🚦 Upstash Config
+ ┗ 📂 models           # 🗄️ Prisma Data Models
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js 18+ installed
-- MongoDB Atlas account
-- Google OAuth credentials
-- Cloudinary account (optional)
+- **Node.js** 18+
+- **Supabase** Project (PostgreSQL)
+- **Google OAuth** Credentials
+- **Cloudinary** Account
+- **Upstash** Redis Database
 
 ### Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/Vijayshreekrishna/FINDMYSTUFF.git
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/Vijayshreekrishna/FINDMYSTUFF.git
+    cd FINDMYSTUFF
+    ```
 
-# Install dependencies
-cd FINDMYSTUFF
-npm install
+2.  **Install dependencies**
+    ```bash
+    npm install
+    # or
+    pnpm install
+    ```
 
-# Set up environment variables
-cp env_template.txt .env.local
-# Edit .env.local with your credentials
+3.  **Configure Environment**
+    Copy the template and fill in your secrets.
+    ```bash
+    cp .env.example .env.local
+    ```
 
-# Run development server
-npm run dev
+4.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+---
+
+## 🌿 Environment Variables
+
+Ensure your `.env.local` is populated:
+
+```env
+# Database
+DATABASE_URL="postgresql://..."
+
+# Auth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret"
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+
+# Services
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="..."
+RESEND_API_KEY="..."
+UPSTASH_REDIS_REST_URL="..."
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="..."
 ```
 
-Visit `http://localhost:3000` to see the app.
+---
 
-### Environment Variables
+## 🚢 Deployment
 
-### 2. Finder-Owner Connection (Free Tier) - [NEW]
-- **Claim System**: Claim items with detailed forms and scoring.
-- **Masked Chat**: Privacy-first chat with SSE streaming and short-poll fallback.
-- **Handoff Verification**: Secure 6-digit code for physical item exchange.
-- **Reputation System**: Reliability scores and verification badges.
-- **Rate Limiting**: Upstash Redis protection.
+The application is optimized for **Vercel**.
 
-See `env_template.txt` for required environment variables (`UPSTASH_*`, `RESEND_API_KEY`, etc).
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FVijayshreekrishna%2FFINDMYSTUFF)
 
-## Deployment
+For detailed deployment steps, please check [documentation/deployment.md](./documentation/deployment.md).
 
-This app is optimized for deployment on Vercel. See `setup_instructions.md` for detailed deployment guide.
+---
 
-## License
+## 🤝 Contributing
 
-MIT
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-## Author
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-Vijayshreekrishna
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+## ✍️ Author
+
+**Vijayshreekrishna**
+
+- [GitHub Profile](https://github.com/Vijayshreekrishna)
+- [LinkedIn](https://linkedin.com/in/vijayshreekrishna)
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by Entropy Labs</sub>
+</div>
