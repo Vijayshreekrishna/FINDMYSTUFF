@@ -7,7 +7,7 @@
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
 <div align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjR5eXF4eHR5eXF4eHR5eXF4eHR5eXF4eHR5eXF4eHR5eXF4eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjeiVyM/giphy.gif" width="100%" height="auto" alt="FindMyStuff Demo" />
+  <video src="./public/preview.mp4" width="100%" controls autoplay loop muted></video>
 </div>
 
 ---
@@ -58,14 +58,7 @@ Whether you've lost a wallet in a cafe or found a set of keys in the park, **Fin
  ┃ ┣ 📂 api            # ⚡ Backend API Routes (Claims, Auth, Chat)
  ┃ ┣ 📂 (auth)         # 🔐 Authentication Pages
  ┃ ┣ 📂 dashboard      # 📊 User Dashboard
- ┃ ┗ 📂 feed           # 📰 Lost & Found Feed
- ┣ 📂 components
- ┃ ┣ 📂 chat           # 💬 Masked Chat UI
- ┃ ┣ 📂 map            # 🗺️ Map Visualizations
- ┃ ┗ 📂 shared         # 🧩 Reusable UI Components
- ┣ 📂 lib
- ┃ ┣ 📜 claimScore.ts  # 🧠 Matching Algorithm
- ┃ ┗ 📜 ratelimit.ts   # 🚦 Upstash Config
+ ┃ ┗ 📂 feed           # 📊 User Dashboard
  ┗ 📂 models           # 🗄️ Prisma Data Models
 ```
 
@@ -140,6 +133,8 @@ The application is optimized for **Vercel**.
 
 For detailed deployment steps, please check [documentation/deployment.md](./documentation/deployment.md).
 
+**Live Demo**: [https://findmystuff.vercel.app](https://findmystuff.vercel.app)
+
 ---
 
 ## 🤝 Contributing
@@ -162,13 +157,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## ✍️ Author
 
-**Vijayshreekrishna**
+<div align="center">
+  <img src="./public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" />
+  <br />
+  <strong>Entropy Labs</strong>
+</div>
 
 - [GitHub Profile](https://github.com/Vijayshreekrishna)
 - [LinkedIn](https://linkedin.com/in/vijayshreekrishna)
+- [Twitter](https://twitter.com/EntropyLabs)
 
 ---
-
-<div align="center">
-  <sub>Built with ❤️ by Entropy Labs</sub>
-</div>
