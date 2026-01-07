@@ -7,7 +7,9 @@
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
 <div align="center">
-  <video src="public/preview.mp4" width="100%" controls autoplay loop muted></video>
+  <a href="https://github.com/Vijayshreekrishna/FINDMYSTUFF/raw/main/public/preview.mp4">
+    <strong>🎥 Watch Preview Video</strong>
+  </a>
 </div>
 
 ---
