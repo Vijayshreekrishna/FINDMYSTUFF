@@ -7,7 +7,7 @@
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
 <div align="center">
-  <img src="public/xyx.gif" width="50%" alt="FindMyStuff Preview" />
+  <img src="public/xyx.gif" width="30%" alt="FindMyStuff Preview" />
 </div>
 
 ---
