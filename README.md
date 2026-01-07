@@ -7,7 +7,7 @@
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
 <div align="center">
-  <video src="./public/preview.mp4" width="100%" controls autoplay loop muted></video>
+  <video src="public/preview.mp4" width="100%" controls autoplay loop muted></video>
 </div>
 
 ---
