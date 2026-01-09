@@ -169,5 +169,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="left">
-  <small><img src="public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" style="margin-top: 10px;" />Guided by <strong><a href="https://github.com/Ayushjain2205">Ayushjain2205</a></strong></small>
+  <small>Guided by <strong><img src="public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" style="margin-top: 10px;" /><a href="https://github.com/Ayushjain2205">Ayushjain2205</a></strong></small>
 </div>
