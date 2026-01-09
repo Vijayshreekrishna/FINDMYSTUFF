@@ -7,7 +7,7 @@
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)
 
 <div align="center">
-  <img src="public/xyx.gif" width="30%" height ="15%" alt="FindMyStuff Preview" />
+  <img src="public/xyx.gif" width="30%" alt="FindMyStuff Preview" />
 </div>
 
 ---
@@ -161,7 +161,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
   <strong><a href="https://github.com/Vijayshreekrishna">Vijayshreekrishna</a></strong>
 </div>
 
-<div align="center">
+<div align="left">
   <br /> 
   <a href="https://linkedin.com/in/vijayshreekrishna">LinkedIn</a>
   <br />
@@ -169,9 +169,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-<div align="center">
+<div align="left">
   <small>Guided by <strong><a href="https://github.com/Ayushjain2205">Ayushjain2205</a></strong></small>
-  <br />
   <img src="public/entropy-logo.svg" alt="Entropy Labs" width="50" height="50" style="margin-top: 10px;" />
   <br />
 </div>
